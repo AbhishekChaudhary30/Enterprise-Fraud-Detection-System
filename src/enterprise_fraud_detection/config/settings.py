@@ -62,6 +62,21 @@ class TrainingSettings:
 
 
 @dataclass(frozen=True)
+class EvaluationSettings:
+    """Evaluation, threshold, explainability, and report configuration."""
+
+    output_directory: Path
+    plots_directory: Path
+    shap_directory: Path
+    experiment_history: Path
+    threshold_strategy: str
+    business_threshold: float
+    threshold_grid_size: int
+    shap_sample_size: int
+    calibration_bins: int
+
+
+@dataclass(frozen=True)
 class Settings:
     """Immutable application settings used by all project modules."""
 
@@ -72,6 +87,7 @@ class Settings:
     paths: PathSettings
     logging: LoggingSettings
     training: TrainingSettings
+    evaluation: EvaluationSettings
 
 
 def _project_root() -> Path:
@@ -107,6 +123,7 @@ def get_settings() -> Settings:
     paths_raw = raw.get("paths", {})
     logging_raw = raw.get("logging", {})
     training_raw = raw.get("training", {})
+    evaluation_raw = raw.get("evaluation", {})
 
     def resolve_path(value: str) -> Path:
         path = Path(value).expanduser()
@@ -153,5 +170,22 @@ def get_settings() -> Settings:
             drop_features=tuple(str(item) for item in training_raw.get("drop_features", [])),
             derived_features=tuple(str(item) for item in training_raw.get("derived_features", [])),
             models=dict(training_raw.get("models", {})),
+        ),
+        evaluation=EvaluationSettings(
+            output_directory=resolve_path(
+                str(evaluation_raw.get("output_directory", "reports/evaluation"))
+            ),
+            plots_directory=resolve_path(
+                str(evaluation_raw.get("plots_directory", "reports/figures/evaluation"))
+            ),
+            shap_directory=resolve_path(str(evaluation_raw.get("shap_directory", "reports/shap"))),
+            experiment_history=resolve_path(
+                str(evaluation_raw.get("experiment_history", "reports/experiments.jsonl"))
+            ),
+            threshold_strategy=str(evaluation_raw.get("threshold_strategy", "maximum_f1")),
+            business_threshold=float(evaluation_raw.get("business_threshold", 0.5)),
+            threshold_grid_size=int(evaluation_raw.get("threshold_grid_size", 99)),
+            shap_sample_size=int(evaluation_raw.get("shap_sample_size", 1000)),
+            calibration_bins=int(evaluation_raw.get("calibration_bins", 10)),
         ),
     )

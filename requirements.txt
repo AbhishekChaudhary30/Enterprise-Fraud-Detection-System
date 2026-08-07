@@ -13,6 +13,7 @@ pyyaml>=6.0
 python-dotenv>=1.0
 loguru>=0.7
 joblib>=1.4
+shap>=0.46
 pytest>=8.3
 black>=24.10
 ruff>=0.8

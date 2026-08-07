@@ -24,6 +24,7 @@ dependencies = [
     "python-dotenv>=1.0",
     "loguru>=0.7",
     "joblib>=1.4",
+    "shap>=0.46",
 ]
 
 [project.optional-dependencies]

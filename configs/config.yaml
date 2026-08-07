@@ -1,6 +1,6 @@
 project:
   name: enterprise-fraud-detection
-  phase: 2
+  phase: 3
 
 dataset:
   filename: creditcard.csv
@@ -63,3 +63,14 @@ training:
       iterations: [100]
       depth: [6]
       learning_rate: [0.1]
+
+evaluation:
+  output_directory: reports/evaluation
+  plots_directory: reports/figures/evaluation
+  shap_directory: reports/shap
+  experiment_history: reports/experiments.jsonl
+  threshold_strategy: maximum_f1
+  business_threshold: 0.50
+  threshold_grid_size: 99
+  shap_sample_size: 1000
+  calibration_bins: 10

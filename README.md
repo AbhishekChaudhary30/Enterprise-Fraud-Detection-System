@@ -15,6 +15,7 @@ A production-oriented foundation for an enterprise fraud detection platform. Thi
 - Logistic Regression, Random Forest, XGBoost, LightGBM, and CatBoost model support
 - Configurable GridSearchCV or RandomizedSearchCV comparison with metric-based selection
 - Versioned model, pipeline, artifact, feature list, and metadata persistence
+- Configurable evaluation metrics, threshold optimization, diagnostic plots, SHAP explanations, error analysis, model cards, and experiment history
 
 Prediction APIs, FastAPI, dashboard, Docker, monitoring, explainability, and automated tests remain reserved for later phases.
 
@@ -79,6 +80,14 @@ Train and compare all enabled Phase 2 models:
 python scripts/train.py
 ```
 
+Evaluate the latest trained model and generate Phase 3 outputs:
+
+```powershell
+python scripts/evaluate.py
+```
+
+Evaluation settings live under `evaluation` in `configs/config.yaml`. Outputs are written to `reports/evaluation/`, `reports/figures/evaluation/`, `reports/shap/`, and `reports/experiments.jsonl`.
+
 Training configuration lives under `training` in `configs/config.yaml`. Set `smote_enabled`, split sizes, search strategy, selection metric, feature lists, and model search spaces there. Each run creates a new `models/vN/` and `artifacts/vN/` directory and never overwrites an existing version.
 
 Outputs are written to `reports/`, `reports/figures/`, and `logs/`. The dataset always belongs in `data/raw/`.
@@ -87,7 +96,7 @@ Outputs are written to `reports/`, `reports/figures/`, and `logs/`. The dataset 
 
 1. **Phase 1:** Foundation, configuration, logging, dataset management, and EDA
 2. **Phase 2:** Feature engineering, preprocessing, model training, tuning, comparison, and versioning
-3. **Phase 3:** Explainability and prediction workflows
+3. **Phase 3:** Evaluation, threshold optimization, explainability, error analysis, model cards, and experiment tracking
 4. **Phase 4:** FastAPI service and dashboard workflow
 5. **Phase 5:** Docker, monitoring, enterprise observability, and deployment hardening
 
