@@ -77,6 +77,24 @@ class EvaluationSettings:
 
 
 @dataclass(frozen=True)
+class ServingSettings:
+    """API, authentication, and prediction-serving configuration."""
+
+    host: str
+    port: int
+    api_prefix: str
+    history_file: Path
+    upload_directory: Path
+    output_directory: Path
+    jwt_algorithm: str
+    access_token_expire_minutes: int
+    admin_username: str
+    default_threshold: float
+    jwt_secret: str
+    admin_password: str
+
+
+@dataclass(frozen=True)
 class Settings:
     """Immutable application settings used by all project modules."""
 
@@ -88,6 +106,7 @@ class Settings:
     logging: LoggingSettings
     training: TrainingSettings
     evaluation: EvaluationSettings
+    serving: ServingSettings
 
 
 def _project_root() -> Path:
@@ -124,6 +143,7 @@ def get_settings() -> Settings:
     logging_raw = raw.get("logging", {})
     training_raw = raw.get("training", {})
     evaluation_raw = raw.get("evaluation", {})
+    serving_raw = raw.get("serving", {})
 
     def resolve_path(value: str) -> Path:
         path = Path(value).expanduser()
@@ -187,5 +207,27 @@ def get_settings() -> Settings:
             threshold_grid_size=int(evaluation_raw.get("threshold_grid_size", 99)),
             shap_sample_size=int(evaluation_raw.get("shap_sample_size", 1000)),
             calibration_bins=int(evaluation_raw.get("calibration_bins", 10)),
+        ),
+        serving=ServingSettings(
+            host=os.getenv("API_HOST", str(serving_raw.get("host", "127.0.0.1"))),
+            port=int(os.getenv("API_PORT", str(serving_raw.get("port", 8000)))),
+            api_prefix=str(serving_raw.get("api_prefix", "/api/v1")),
+            history_file=resolve_path(
+                str(serving_raw.get("history_file", "artifacts/prediction_history.jsonl"))
+            ),
+            upload_directory=resolve_path(
+                str(serving_raw.get("upload_directory", "artifacts/uploads"))
+            ),
+            output_directory=resolve_path(
+                str(serving_raw.get("output_directory", "artifacts/predictions"))
+            ),
+            jwt_algorithm=str(serving_raw.get("jwt_algorithm", "HS256")),
+            access_token_expire_minutes=int(serving_raw.get("access_token_expire_minutes", 60)),
+            admin_username=os.getenv(
+                "ADMIN_USERNAME", str(serving_raw.get("admin_username", "admin"))
+            ),
+            default_threshold=float(serving_raw.get("default_threshold", 0.5)),
+            jwt_secret=os.getenv("JWT_SECRET", "change-this-secret-in-env"),
+            admin_password=os.getenv("ADMIN_PASSWORD", "change-this-password-in-env"),
         ),
     )

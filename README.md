@@ -1,6 +1,6 @@
 # Enterprise Fraud Detection System
 
-A production-oriented foundation for an enterprise fraud detection platform. This repository currently contains **Phase 2**: project architecture, configuration, logging, dataset management, exploratory analysis, and a configurable machine learning training pipeline.
+A production-oriented foundation for an enterprise fraud detection platform. This repository currently contains **Phase 4**: model training, evaluation, explainability, authenticated FastAPI serving, prediction workflows, and a Streamlit dashboard.
 
 ## Phase 1 Scope
 
@@ -16,6 +16,9 @@ A production-oriented foundation for an enterprise fraud detection platform. Thi
 - Configurable GridSearchCV or RandomizedSearchCV comparison with metric-based selection
 - Versioned model, pipeline, artifact, feature list, and metadata persistence
 - Configurable evaluation metrics, threshold optimization, diagnostic plots, SHAP explanations, error analysis, model cards, and experiment history
+- Versioned FastAPI endpoints for health, authentication, predictions, CSV workflows, models, reports, and history
+- JWT authentication with admin role protection and process-cached model loading
+- Streamlit dashboard for predictions, uploads, metrics, plots, SHAP outputs, history, and administration
 
 Prediction APIs, FastAPI, dashboard, Docker, monitoring, explainability, and automated tests remain reserved for later phases.
 
@@ -33,9 +36,14 @@ reports/                         Validation and EDA reports
 reports/figures/                 Generated EDA figures
 notebooks/                       Analysis notebooks boundary
 scripts/                         Phase 1 command-line scripts
+dashboard/                       Streamlit dashboard
 src/enterprise_fraud_detection/  Importable application package
 	features/                      Preprocessing and feature engineering
 	modeling/                      Model factory and training orchestration
+	serving/                       Model loading and prediction services
+	auth/                          JWT authentication
+	api/                           FastAPI application and routers
+	evaluation/                    Metrics and explainability
 tests/                            Future test boundary
 docs/                             Project documentation
 .github/                          Repository guidance
@@ -88,6 +96,22 @@ python scripts/evaluate.py
 
 Evaluation settings live under `evaluation` in `configs/config.yaml`. Outputs are written to `reports/evaluation/`, `reports/figures/evaluation/`, `reports/shap/`, and `reports/experiments.jsonl`.
 
+Start the FastAPI backend:
+
+```powershell
+python scripts/start_api.py
+```
+
+The versioned API is available at `http://127.0.0.1:8000/api/v1`; Swagger UI is at `http://127.0.0.1:8000/docs`.
+
+Start the dashboard in another terminal:
+
+```powershell
+python scripts/start_dashboard.py
+```
+
+Set `JWT_SECRET`, `ADMIN_USERNAME`, and `ADMIN_PASSWORD` in `.env` before shared or non-local use.
+
 Training configuration lives under `training` in `configs/config.yaml`. Set `smote_enabled`, split sizes, search strategy, selection metric, feature lists, and model search spaces there. Each run creates a new `models/vN/` and `artifacts/vN/` directory and never overwrites an existing version.
 
 Outputs are written to `reports/`, `reports/figures/`, and `logs/`. The dataset always belongs in `data/raw/`.
@@ -97,7 +121,7 @@ Outputs are written to `reports/`, `reports/figures/`, and `logs/`. The dataset 
 1. **Phase 1:** Foundation, configuration, logging, dataset management, and EDA
 2. **Phase 2:** Feature engineering, preprocessing, model training, tuning, comparison, and versioning
 3. **Phase 3:** Evaluation, threshold optimization, explainability, error analysis, model cards, and experiment tracking
-4. **Phase 4:** FastAPI service and dashboard workflow
+4. **Phase 4:** FastAPI service, authentication, prediction workflows, and dashboard
 5. **Phase 5:** Docker, monitoring, enterprise observability, and deployment hardening
 
 ## Engineering Principles

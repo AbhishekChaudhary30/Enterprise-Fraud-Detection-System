@@ -25,6 +25,12 @@ dependencies = [
     "loguru>=0.7",
     "joblib>=1.4",
     "shap>=0.46",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "python-jose[cryptography]>=3.3",
+    "passlib[bcrypt]>=1.7",
+    "python-multipart>=0.0.12",
+    "streamlit>=1.40",
 ]
 
 [project.optional-dependencies]

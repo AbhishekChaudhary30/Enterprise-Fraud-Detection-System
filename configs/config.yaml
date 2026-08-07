@@ -1,6 +1,6 @@
 project:
   name: enterprise-fraud-detection
-  phase: 3
+  phase: 4
 
 dataset:
   filename: creditcard.csv
@@ -74,3 +74,15 @@ evaluation:
   threshold_grid_size: 99
   shap_sample_size: 1000
   calibration_bins: 10
+
+serving:
+  host: 127.0.0.1
+  port: 8000
+  api_prefix: /api/v1
+  history_file: artifacts/prediction_history.jsonl
+  upload_directory: artifacts/uploads
+  output_directory: artifacts/predictions
+  jwt_algorithm: HS256
+  access_token_expire_minutes: 60
+  admin_username: admin
+  default_threshold: 0.32
