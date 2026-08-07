@@ -88,6 +88,11 @@ def create_app() -> FastAPI:
     app.include_router(auth.router, prefix=prefix, tags=["authentication"])
     app.include_router(predictions.router, prefix=prefix, tags=["predictions"])
     app.include_router(reports.router, prefix=prefix, tags=["artifacts"])
+    # Preserve the original unversioned route contract for existing clients.
+    app.include_router(system.router, tags=["legacy"])
+    app.include_router(auth.router, tags=["legacy"])
+    app.include_router(predictions.router, tags=["legacy"])
+    app.include_router(reports.router, tags=["legacy"])
     return app
 
 

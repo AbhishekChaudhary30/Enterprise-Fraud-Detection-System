@@ -169,9 +169,15 @@ def get_settings() -> Settings:
     jwt_secret = os.getenv("JWT_SECRET", "change-this-secret-in-env")
     admin_password = os.getenv("ADMIN_PASSWORD", "change-this-password-in-env")
     if environment.lower() == "production" and (
-        jwt_secret == "change-this-secret-in-env" or admin_password == "change-this-password-in-env"
+        jwt_secret == "change-this-secret-in-env"
+        or admin_password == "change-this-password-in-env"
+        or len(jwt_secret) < 32
+        or len(admin_password) < 12
     ):
-        raise ValueError("Production requires JWT_SECRET and ADMIN_PASSWORD environment variables")
+        raise ValueError(
+            "Production requires a JWT_SECRET of at least 32 characters and "
+            "an ADMIN_PASSWORD of at least 12 characters"
+        )
 
     def resolve_path(value: str) -> Path:
         path = Path(value).expanduser()

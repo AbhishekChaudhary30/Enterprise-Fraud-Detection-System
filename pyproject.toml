@@ -61,3 +61,9 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+addopts = "-ra"
+markers = [
+    "unit: isolated tests with no application services or repository artifacts",
+    "integration: tests across multiple real application components",
+    "e2e: public workflow tests through the application boundary",
+]

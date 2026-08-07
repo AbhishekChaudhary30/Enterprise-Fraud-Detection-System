@@ -130,6 +130,8 @@ mypy src
 pytest -q
 ```
 
+Testing architecture and fixture policy are documented in [docs/TESTING.md](docs/TESTING.md). Unit tests use synthetic data and temporary artifacts; integration and E2E tests exercise the real API and authentication implementation.
+
 Build and run the production container:
 
 ```powershell
