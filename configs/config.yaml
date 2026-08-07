@@ -1,6 +1,6 @@
 project:
   name: enterprise-fraud-detection
-  phase: 1
+  phase: 2
 
 dataset:
   filename: creditcard.csv
@@ -21,3 +21,45 @@ logging:
   level: INFO
   rotation: 00:00
   retention: 30 days
+
+training:
+  random_state: 42
+  test_size: 0.20
+  validation_size: 0.20
+  smote_enabled: false
+  selection_metric: average_precision
+  search_type: randomized
+  cv_folds: 3
+  randomized_iterations: 2
+  selected_features: []
+  drop_features: []
+  derived_features: []
+  models:
+    logistic_regression:
+      enabled: true
+      class_weight: balanced
+      max_iter: 1000
+      c: [0.1, 1.0]
+    random_forest:
+      enabled: true
+      n_estimators: [100]
+      max_depth: [12]
+      min_samples_leaf: [1]
+      class_weight: balanced_subsample
+    xgboost:
+      enabled: true
+      n_estimators: [100]
+      max_depth: [6]
+      learning_rate: [0.1]
+      subsample: [0.9]
+      colsample_bytree: [0.9]
+    lightgbm:
+      enabled: true
+      n_estimators: [100]
+      num_leaves: [31]
+      learning_rate: [0.1]
+    catboost:
+      enabled: true
+      iterations: [100]
+      depth: [6]
+      learning_rate: [0.1]

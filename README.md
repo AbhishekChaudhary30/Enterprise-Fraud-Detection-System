@@ -1,6 +1,6 @@
 # Enterprise Fraud Detection System
 
-A production-oriented foundation for an enterprise fraud detection platform. This repository currently contains **Phase 1 only**: project architecture, configuration, logging, dataset management, and exploratory analysis.
+A production-oriented foundation for an enterprise fraud detection platform. This repository currently contains **Phase 2**: project architecture, configuration, logging, dataset management, exploratory analysis, and a configurable machine learning training pipeline.
 
 ## Phase 1 Scope
 
@@ -11,8 +11,12 @@ A production-oriented foundation for an enterprise fraud detection platform. Thi
 - Automatic Credit Card Fraud Detection dataset download and extraction
 - Dataset validation report covering schema, target, missing values, duplicates, dtypes, and statistics
 - EDA report with class distribution, missing values, correlations, distributions, and fraud-vs-normal comparisons
+- Reusable preprocessing, feature engineering, optional SMOTE, stratified train/validation/test splitting
+- Logistic Regression, Random Forest, XGBoost, LightGBM, and CatBoost model support
+- Configurable GridSearchCV or RandomizedSearchCV comparison with metric-based selection
+- Versioned model, pipeline, artifact, feature list, and metadata persistence
 
-Model training, prediction, evaluation, API, dashboard, Docker, monitoring, explainability, and automated tests are intentionally reserved for later phases.
+Prediction APIs, FastAPI, dashboard, Docker, monitoring, explainability, and automated tests remain reserved for later phases.
 
 ## Folder Structure
 
@@ -29,6 +33,8 @@ reports/figures/                 Generated EDA figures
 notebooks/                       Analysis notebooks boundary
 scripts/                         Phase 1 command-line scripts
 src/enterprise_fraud_detection/  Importable application package
+	features/                      Preprocessing and feature engineering
+	modeling/                      Model factory and training orchestration
 tests/                            Future test boundary
 docs/                             Project documentation
 .github/                          Repository guidance
@@ -67,13 +73,21 @@ Generate the EDA report and figures:
 python scripts/run_eda.py
 ```
 
+Train and compare all enabled Phase 2 models:
+
+```powershell
+python scripts/train.py
+```
+
+Training configuration lives under `training` in `configs/config.yaml`. Set `smote_enabled`, split sizes, search strategy, selection metric, feature lists, and model search spaces there. Each run creates a new `models/vN/` and `artifacts/vN/` directory and never overwrites an existing version.
+
 Outputs are written to `reports/`, `reports/figures/`, and `logs/`. The dataset always belongs in `data/raw/`.
 
 ## Project Roadmap
 
 1. **Phase 1:** Foundation, configuration, logging, dataset management, and EDA
-2. **Phase 2:** Feature engineering and reproducible data preparation
-3. **Phase 3:** Model development, evaluation, and explainability
+2. **Phase 2:** Feature engineering, preprocessing, model training, tuning, comparison, and versioning
+3. **Phase 3:** Explainability and prediction workflows
 4. **Phase 4:** FastAPI service and dashboard workflow
 5. **Phase 5:** Docker, monitoring, enterprise observability, and deployment hardening
 

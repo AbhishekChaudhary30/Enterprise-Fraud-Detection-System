@@ -44,8 +44,26 @@ class LoggingSettings:
 
 
 @dataclass(frozen=True)
+class TrainingSettings:
+    """Machine learning training configuration."""
+
+    random_state: int
+    test_size: float
+    validation_size: float
+    smote_enabled: bool
+    selection_metric: str
+    search_type: str
+    cv_folds: int
+    randomized_iterations: int
+    selected_features: tuple[str, ...]
+    drop_features: tuple[str, ...]
+    derived_features: tuple[str, ...]
+    models: dict[str, dict[str, Any]]
+
+
+@dataclass(frozen=True)
 class Settings:
-    """Immutable application settings used by all Phase 1 modules."""
+    """Immutable application settings used by all project modules."""
 
     project_root: Path
     project_name: str
@@ -53,6 +71,7 @@ class Settings:
     dataset: DatasetSettings
     paths: PathSettings
     logging: LoggingSettings
+    training: TrainingSettings
 
 
 def _project_root() -> Path:
@@ -87,6 +106,7 @@ def get_settings() -> Settings:
     dataset_raw = raw.get("dataset", {})
     paths_raw = raw.get("paths", {})
     logging_raw = raw.get("logging", {})
+    training_raw = raw.get("training", {})
 
     def resolve_path(value: str) -> Path:
         path = Path(value).expanduser()
@@ -117,5 +137,21 @@ def get_settings() -> Settings:
             level=os.getenv("LOG_LEVEL", str(logging_raw.get("level", "INFO"))),
             rotation=str(logging_raw.get("rotation", "00:00")),
             retention=str(logging_raw.get("retention", "30 days")),
+        ),
+        training=TrainingSettings(
+            random_state=int(training_raw.get("random_state", 42)),
+            test_size=float(training_raw.get("test_size", 0.2)),
+            validation_size=float(training_raw.get("validation_size", 0.2)),
+            smote_enabled=bool(training_raw.get("smote_enabled", False)),
+            selection_metric=str(training_raw.get("selection_metric", "average_precision")),
+            search_type=str(training_raw.get("search_type", "randomized")),
+            cv_folds=int(training_raw.get("cv_folds", 3)),
+            randomized_iterations=int(training_raw.get("randomized_iterations", 2)),
+            selected_features=tuple(
+                str(item) for item in training_raw.get("selected_features", [])
+            ),
+            drop_features=tuple(str(item) for item in training_raw.get("drop_features", [])),
+            derived_features=tuple(str(item) for item in training_raw.get("derived_features", [])),
+            models=dict(training_raw.get("models", {})),
         ),
     )
