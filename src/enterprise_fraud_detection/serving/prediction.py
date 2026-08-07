@@ -101,12 +101,12 @@ class PredictionService:
         self, bundle: LoadedModel, frame: pd.DataFrame, threshold: float | None
     ) -> pd.DataFrame:
         """Apply the persisted pipeline and convert probabilities to labels."""
-        probabilities = bundle.pipeline.predict_proba(frame)[:, 1]
         selected_threshold = (
             threshold if threshold is not None else self.settings.serving.default_threshold
         )
         if not 0 < selected_threshold < 1:
             raise ValueError("Threshold must be greater than 0 and less than 1")
+        probabilities = bundle.pipeline.predict_proba(frame)[:, 1]
         labels = (probabilities >= selected_threshold).astype(int)
         confidence = abs(probabilities - 0.5) * 2
         return pd.DataFrame(

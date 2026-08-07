@@ -1,0 +1,15 @@
+.git
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.env
+logs
+artifacts/uploads
+artifacts/predictions
+catboost_info
+reports/benchmarks
+reports/drift
+data/raw

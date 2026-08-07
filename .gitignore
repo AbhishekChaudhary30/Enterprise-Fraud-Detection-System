@@ -8,6 +8,8 @@ __pycache__/
 .ruff_cache/
 .pytest_cache/
 .coverage
+.streamlit/
+catboost_info/
 
 # Environment and local configuration
 .env
@@ -31,6 +33,8 @@ reports/*
 !reports/.gitkeep
 reports/figures/*
 !reports/figures/.gitkeep
+reports/drift/*
+reports/benchmarks/*
 figures/*
 !figures/.gitkeep
 

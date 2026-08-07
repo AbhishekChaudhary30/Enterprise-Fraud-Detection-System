@@ -95,6 +95,22 @@ class ServingSettings:
 
 
 @dataclass(frozen=True)
+class ProductionSettings:
+    """Production hardening, observability, and drift configuration."""
+
+    environment: str
+    rate_limit_requests: int
+    rate_limit_window_seconds: int
+    request_id_header: str
+    metrics_path: Path
+    drift_output_directory: Path
+    benchmark_output_directory: Path
+    reference_data_path: Path
+    drift_numeric_threshold: float
+    drift_prediction_threshold: float
+
+
+@dataclass(frozen=True)
 class Settings:
     """Immutable application settings used by all project modules."""
 
@@ -107,6 +123,7 @@ class Settings:
     training: TrainingSettings
     evaluation: EvaluationSettings
     serving: ServingSettings
+    production: ProductionSettings
 
 
 def _project_root() -> Path:
@@ -144,6 +161,17 @@ def get_settings() -> Settings:
     training_raw = raw.get("training", {})
     evaluation_raw = raw.get("evaluation", {})
     serving_raw = raw.get("serving", {})
+    production_raw = raw.get("production", {})
+
+    environment = os.getenv(
+        "APP_ENVIRONMENT", str(production_raw.get("environment", "development"))
+    )
+    jwt_secret = os.getenv("JWT_SECRET", "change-this-secret-in-env")
+    admin_password = os.getenv("ADMIN_PASSWORD", "change-this-password-in-env")
+    if environment.lower() == "production" and (
+        jwt_secret == "change-this-secret-in-env" or admin_password == "change-this-password-in-env"
+    ):
+        raise ValueError("Production requires JWT_SECRET and ADMIN_PASSWORD environment variables")
 
     def resolve_path(value: str) -> Path:
         path = Path(value).expanduser()
@@ -227,7 +255,29 @@ def get_settings() -> Settings:
                 "ADMIN_USERNAME", str(serving_raw.get("admin_username", "admin"))
             ),
             default_threshold=float(serving_raw.get("default_threshold", 0.5)),
-            jwt_secret=os.getenv("JWT_SECRET", "change-this-secret-in-env"),
-            admin_password=os.getenv("ADMIN_PASSWORD", "change-this-password-in-env"),
+            jwt_secret=jwt_secret,
+            admin_password=admin_password,
+        ),
+        production=ProductionSettings(
+            environment=environment,
+            rate_limit_requests=int(production_raw.get("rate_limit_requests", 120)),
+            rate_limit_window_seconds=int(production_raw.get("rate_limit_window_seconds", 60)),
+            request_id_header=str(production_raw.get("request_id_header", "X-Request-ID")),
+            metrics_path=resolve_path(
+                str(production_raw.get("metrics_path", "artifacts/metrics.json"))
+            ),
+            drift_output_directory=resolve_path(
+                str(production_raw.get("drift_output_directory", "reports/drift"))
+            ),
+            benchmark_output_directory=resolve_path(
+                str(production_raw.get("benchmark_output_directory", "reports/benchmarks"))
+            ),
+            reference_data_path=resolve_path(
+                str(production_raw.get("reference_data_path", "data/raw/creditcard.csv"))
+            ),
+            drift_numeric_threshold=float(production_raw.get("drift_numeric_threshold", 0.10)),
+            drift_prediction_threshold=float(
+                production_raw.get("drift_prediction_threshold", 0.10)
+            ),
         ),
     )

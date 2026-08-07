@@ -1,8 +1,8 @@
 # Enterprise Fraud Detection System
 
-A production-oriented foundation for an enterprise fraud detection platform. This repository currently contains **Phase 4**: model training, evaluation, explainability, authenticated FastAPI serving, prediction workflows, and a Streamlit dashboard.
+A production-ready enterprise fraud detection application. This repository contains the completed five-phase system: reproducible ML training, evaluation and explainability, authenticated serving, dashboard workflows, container packaging, automated quality checks, monitoring, drift detection, benchmarking, and documentation.
 
-## Phase 1 Scope
+## Capabilities
 
 - Python 3.12-compatible `src` package layout
 - YAML configuration with environment variable overrides
@@ -20,7 +20,7 @@ A production-oriented foundation for an enterprise fraud detection platform. Thi
 - JWT authentication with admin role protection and process-cached model loading
 - Streamlit dashboard for predictions, uploads, metrics, plots, SHAP outputs, history, and administration
 
-Prediction APIs, FastAPI, dashboard, Docker, monitoring, explainability, and automated tests remain reserved for later phases.
+Phase 5 is the final release hardening layer. Cloud deployment and deployment-specific CI/CD remain intentionally outside this repository.
 
 ## Folder Structure
 
@@ -35,7 +35,7 @@ logs/                            Daily rotating application logs
 reports/                         Validation and EDA reports
 reports/figures/                 Generated EDA figures
 notebooks/                       Analysis notebooks boundary
-scripts/                         Phase 1 command-line scripts
+scripts/                         Training, evaluation, serving, drift, and benchmark commands
 dashboard/                       Streamlit dashboard
 src/enterprise_fraud_detection/  Importable application package
 	features/                      Preprocessing and feature engineering
@@ -44,7 +44,7 @@ src/enterprise_fraud_detection/  Importable application package
 	auth/                          JWT authentication
 	api/                           FastAPI application and routers
 	evaluation/                    Metrics and explainability
-tests/                            Future test boundary
+tests/                            Unit and API behavior tests
 docs/                             Project documentation
 .github/                          Repository guidance
 ```
@@ -62,7 +62,7 @@ python -m pip install -e ".[dev]"
 
 Copy `.env.example` to `.env` when local overrides are needed. The default public Kaggle API URL is configured in `configs/config.yaml`; restricted networks can use a downloaded archive or set `DATASET_URL` to an accessible compatible ZIP URL.
 
-## Running Phase 1
+## Running the System
 
 Download and validate the dataset:
 
@@ -112,6 +112,31 @@ python scripts/start_dashboard.py
 
 Set `JWT_SECRET`, `ADMIN_USERNAME`, and `ADMIN_PASSWORD` in `.env` before shared or non-local use.
 
+Run operational drift and performance checks:
+
+```powershell
+python scripts/run_drift.py
+python scripts/benchmark.py
+```
+
+Outputs are written to `reports/drift/`, `reports/benchmarks/`, and `artifacts/metrics.json`.
+
+Run the quality gate:
+
+```powershell
+ruff check src scripts dashboard tests
+black --check src scripts dashboard tests
+mypy src
+pytest -q
+```
+
+Build and run the production container:
+
+```powershell
+docker build --target production -t enterprise-fraud-detection:1.0.0 .
+docker compose up --build
+```
+
 Training configuration lives under `training` in `configs/config.yaml`. Set `smote_enabled`, split sizes, search strategy, selection metric, feature lists, and model search spaces there. Each run creates a new `models/vN/` and `artifacts/vN/` directory and never overwrites an existing version.
 
 Outputs are written to `reports/`, `reports/figures/`, and `logs/`. The dataset always belongs in `data/raw/`.
@@ -122,7 +147,7 @@ Outputs are written to `reports/`, `reports/figures/`, and `logs/`. The dataset 
 2. **Phase 2:** Feature engineering, preprocessing, model training, tuning, comparison, and versioning
 3. **Phase 3:** Evaluation, threshold optimization, explainability, error analysis, model cards, and experiment tracking
 4. **Phase 4:** FastAPI service, authentication, prediction workflows, and dashboard
-5. **Phase 5:** Docker, monitoring, enterprise observability, and deployment hardening
+5. **Phase 5:** Docker, automated testing, CI quality checks, monitoring, drift detection, security, benchmarking, and release documentation
 
 ## Engineering Principles
 

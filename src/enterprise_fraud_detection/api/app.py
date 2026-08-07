@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from typing import Any
+from typing import Any, cast
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -12,6 +12,8 @@ from loguru import logger
 from enterprise_fraud_detection.api.routes import auth, predictions, reports, system
 from enterprise_fraud_detection.auth.security import AuthService
 from enterprise_fraud_detection.config import get_settings
+from enterprise_fraud_detection.monitoring.metrics import MetricsRegistry
+from enterprise_fraud_detection.monitoring.security import RateLimiter, SecurityMiddleware
 from enterprise_fraud_detection.serving.model_loader import ModelLoader
 from enterprise_fraud_detection.serving.prediction import PredictionService
 from enterprise_fraud_detection.utils.logging import configure_logging
@@ -33,18 +35,29 @@ def create_app() -> FastAPI:
     app.state.auth = AuthService(settings)
     app.state.loader = ModelLoader(settings)
     app.state.predictions = PredictionService(settings, app.state.loader)
+    app.state.metrics = MetricsRegistry(settings.production.metrics_path)
+    app.add_middleware(
+        SecurityMiddleware,
+        limiter=RateLimiter(
+            settings.production.rate_limit_requests,
+            settings.production.rate_limit_window_seconds,
+        ),
+        request_id_header=settings.production.request_id_header,
+    )
 
     @app.middleware("http")
     async def request_logging(request: Request, call_next: Any) -> Any:
         started = time.perf_counter()
         try:
             response = await call_next(request)
+            latency_ms = (time.perf_counter() - started) * 1000
+            request.app.state.metrics.observe_request(latency_ms, response.status_code)
             logger.info(
                 "API request {} {} completed with {} in {:.2f}ms",
                 request.method,
                 request.url.path,
                 response.status_code,
-                (time.perf_counter() - started) * 1000,
+                latency_ms,
             )
             return response
         except Exception:
@@ -60,6 +73,15 @@ def create_app() -> FastAPI:
     async def not_found_handler(request: Request, exc: FileNotFoundError) -> JSONResponse:
         del request
         return JSONResponse(status_code=404, content={"detail": str(exc)})
+
+    @app.get("/metrics", tags=["system"])
+    async def metrics() -> dict[str, Any]:
+        """Return process and API metrics for operators."""
+        snapshot = cast(dict[str, Any], app.state.metrics.snapshot())
+        bundle = app.state.loader.load()
+        snapshot["model_version"] = bundle.version
+        snapshot["model_name"] = bundle.metadata.get("selected_model")
+        return snapshot
 
     prefix = settings.serving.api_prefix
     app.include_router(system.router, prefix=prefix, tags=["system"])

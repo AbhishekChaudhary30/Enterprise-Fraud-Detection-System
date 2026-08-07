@@ -1,6 +1,6 @@
 project:
   name: enterprise-fraud-detection
-  phase: 4
+  phase: 5
 
 dataset:
   filename: creditcard.csv
@@ -86,3 +86,15 @@ serving:
   access_token_expire_minutes: 60
   admin_username: admin
   default_threshold: 0.32
+
+production:
+  environment: development
+  rate_limit_requests: 120
+  rate_limit_window_seconds: 60
+  request_id_header: X-Request-ID
+  metrics_path: artifacts/metrics.json
+  drift_output_directory: reports/drift
+  benchmark_output_directory: reports/benchmarks
+  reference_data_path: data/raw/creditcard.csv
+  drift_numeric_threshold: 0.10
+  drift_prediction_threshold: 0.10

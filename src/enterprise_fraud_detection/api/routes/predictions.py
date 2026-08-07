@@ -29,13 +29,16 @@ async def predict(
     user: Annotated[dict[str, str], Depends(current_user)],
 ) -> dict[str, Any]:
     """Score one transaction through the latest or requested model version."""
-    del request, user
-    return prediction_service.predict_one(payload.features, payload.version, payload.threshold)
+    del user
+    response = prediction_service.predict_one(payload.features, payload.version, payload.threshold)
+    request.app.state.metrics.observe_prediction()
+    return response
 
 
 @router.post("/predict/batch")
 async def predict_batch(
     payload: BatchPredictionRequest,
+    request: Request,
     prediction_service: Annotated[PredictionService, Depends(service)],
     user: Annotated[dict[str, str], Depends(current_user)],
 ) -> dict[str, Any]:
@@ -45,11 +48,13 @@ async def predict_batch(
     output, details = prediction_service.predict_batch(
         frame, payload.version, payload.threshold, input_reference="json_batch"
     )
+    request.app.state.metrics.observe_prediction(len(output), batch=True)
     return {"metadata": details, "predictions": output.to_dict(orient="records")}
 
 
 @router.post("/upload")
 async def upload_csv(
+    request: Request,
     prediction_service: Annotated[PredictionService, Depends(service)],
     user: Annotated[dict[str, str], Depends(current_user)],
     file: UploadFile = CSV_FILE,
@@ -63,6 +68,7 @@ async def upload_csv(
         pd.read_csv(io.BytesIO(content)), prediction_service.settings.dataset.target_column
     )
     output, _ = prediction_service.predict_batch(frame, input_reference=file.filename)
+    request.app.state.metrics.observe_prediction(len(output), batch=True)
     stream = io.StringIO()
     output.to_csv(stream, index=False)
     stream.seek(0)

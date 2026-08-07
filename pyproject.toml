@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "enterprise-fraud-detection"
-version = "0.1.0"
-description = "Phase 1 foundation for an enterprise fraud detection system"
+version = "1.0.0"
+description = "Production-ready enterprise fraud detection system"
 readme = "README.md"
 requires-python = ">=3.12,<3.14"
 dependencies = [
@@ -31,10 +31,12 @@ dependencies = [
     "passlib[bcrypt]>=1.7",
     "python-multipart>=0.0.12",
     "streamlit>=1.40",
+    "psutil>=6.1",
+    "httpx2>=0.1",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.3", "black>=24.10", "ruff>=0.8", "mypy>=1.13"]
+dev = ["pytest>=8.3", "black>=24.10", "ruff>=0.8", "mypy>=1.13", "httpx2>=0.1"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
