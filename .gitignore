@@ -1,0 +1,41 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+
+# Environment and local configuration
+.env
+
+# Runtime output
+logs/*
+!logs/.gitkeep
+artifacts/*
+!artifacts/.gitkeep
+models/*
+!models/.gitkeep
+
+# Generated data and reports
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/external/*
+!data/external/.gitkeep
+reports/*
+!reports/.gitkeep
+reports/figures/*
+!reports/figures/.gitkeep
+figures/*
+!figures/.gitkeep
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

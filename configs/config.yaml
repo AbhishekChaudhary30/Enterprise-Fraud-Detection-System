@@ -1,0 +1,23 @@
+project:
+  name: enterprise-fraud-detection
+  phase: 1
+
+dataset:
+  filename: creditcard.csv
+  target_column: Class
+  download_url: https://www.kaggle.com/api/v1/datasets/download/mlg-ulb/creditcardfraud
+
+paths:
+  raw_data: data/raw
+  processed_data: data/processed
+  external_data: data/external
+  models: models
+  artifacts: artifacts
+  logs: logs
+  reports: reports
+  figures: reports/figures
+
+logging:
+  level: INFO
+  rotation: 00:00
+  retention: 30 days

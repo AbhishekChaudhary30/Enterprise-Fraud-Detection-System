@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "enterprise-fraud-detection"
+version = "0.1.0"
+description = "Phase 1 foundation for an enterprise fraud detection system"
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "scikit-learn>=1.5",
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "matplotlib>=3.9",
+    "plotly>=5.24",
+    "seaborn>=0.13",
+    "scipy>=1.13",
+    "imbalanced-learn>=0.12",
+    "xgboost>=2.1",
+    "lightgbm>=4.5",
+    "catboost>=1.2",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+    "loguru>=0.7",
+    "joblib>=1.4",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.3", "black>=24.10", "ruff>=0.8", "mypy>=1.13"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "D"]
+ignore = ["D203", "D213"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
