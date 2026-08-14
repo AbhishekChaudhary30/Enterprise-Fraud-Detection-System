@@ -20,8 +20,8 @@ logs/*
 !logs/.gitkeep
 artifacts/*
 !artifacts/.gitkeep
-models/*
-!models/.gitkeep
+# models/*
+# !models/.gitkeep
 
 # Generated data and reports
 data/raw/*
