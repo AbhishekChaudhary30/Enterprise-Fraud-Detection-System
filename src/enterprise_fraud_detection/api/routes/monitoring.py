@@ -29,7 +29,13 @@ async def dashboard_stats(
     """Aggregated KPI statistics for the dashboard."""
     del user
     loader = request.app.state.loader
-    bundle = loader.load()
+    try:
+        bundle = loader.load()
+        model_version = bundle.version
+        model_algorithm = bundle.metadata.get("selected_model", "unknown")
+    except Exception:
+        model_version = "None loaded"
+        model_algorithm = "N/A"
 
     with get_db() as db:
         user_id = int(user["user_id"]) if "user_id" in user else None
@@ -56,8 +62,8 @@ async def dashboard_stats(
             "medium": risk_dist.get("MEDIUM", 0),
             "high": risk_dist.get("HIGH", 0),
         },
-        "model_version": bundle.version,
-        "model_algorithm": bundle.metadata.get("selected_model", "unknown"),
+        "model_version": model_version,
+        "model_algorithm": model_algorithm,
         "avg_probability": round(avg_prob, 6),
         "investigation_counts": inv_counts,
         "model_metrics": metrics,
@@ -198,12 +204,18 @@ async def monitoring_model_metrics(
                 threshold_data.append({k: float(v) for k, v in row.items()})
 
     loader = request.app.state.loader
-    bundle = loader.load()
+    try:
+        bundle = loader.load()
+        model_version = bundle.version
+        model_algorithm = bundle.metadata.get("selected_model", "unknown")
+    except Exception:
+        model_version = "None loaded"
+        model_algorithm = "N/A"
 
     return {
         "metrics": metrics,
-        "model_version": bundle.version,
-        "model_algorithm": bundle.metadata.get("selected_model", "unknown"),
+        "model_version": model_version,
+        "model_algorithm": model_algorithm,
         "threshold_analysis": threshold_data[:20],  # First 20 for chart
         "available": True,
     }
