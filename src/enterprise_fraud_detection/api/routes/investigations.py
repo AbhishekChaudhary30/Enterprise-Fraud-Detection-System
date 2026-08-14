@@ -66,7 +66,9 @@ async def create_investigation(
         inv_repo = InvestigationRepository(db)
         existing = inv_repo.get_by_prediction_id(payload.prediction_id)
         if existing:
-            raise HTTPException(status_code=409, detail="Investigation already exists for this prediction")
+            raise HTTPException(
+                status_code=409, detail="Investigation already exists for this prediction"
+            )
         investigation = inv_repo.create(payload.prediction_id, payload.priority)
         db.commit()
         return {

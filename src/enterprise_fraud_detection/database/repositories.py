@@ -38,8 +38,14 @@ class PredictionRepository:
             threshold=data["threshold"],
             execution_time_ms=data.get("execution_time_ms"),
             input_reference=data.get("input_reference"),
-            features_json=json.dumps(data.get("features"), default=str) if data.get("features") else None,
-            explanation_json=json.dumps(data.get("explanation"), default=str) if data.get("explanation") else None,
+            features_json=(
+                json.dumps(data.get("features"), default=str) if data.get("features") else None
+            ),
+            explanation_json=(
+                json.dumps(data.get("explanation"), default=str)
+                if data.get("explanation")
+                else None
+            ),
         )
         self.session.add(record)
         self.session.flush()
@@ -48,7 +54,9 @@ class PredictionRepository:
     def get_by_id(self, prediction_id: str) -> PredictionRecord | None:
         return self.session.query(PredictionRecord).filter_by(prediction_id=prediction_id).first()
 
-    def list_recent(self, limit: int = 100, risk_level: str | None = None) -> list[PredictionRecord]:
+    def list_recent(
+        self, limit: int = 100, risk_level: str | None = None
+    ) -> list[PredictionRecord]:
         query = self.session.query(PredictionRecord)
         if risk_level:
             query = query.filter_by(risk_level=risk_level)
@@ -102,16 +110,18 @@ class InvestigationRepository:
     def get_by_prediction_id(self, prediction_id: str) -> Investigation | None:
         return self.session.query(Investigation).filter_by(prediction_id=prediction_id).first()
 
-    def list_all(
-        self, limit: int = 100, status: str | None = None
-    ) -> list[Investigation]:
+    def list_all(self, limit: int = 100, status: str | None = None) -> list[Investigation]:
         query = self.session.query(Investigation)
         if status:
             query = query.filter_by(status=status)
         return list(query.order_by(desc(Investigation.created_at)).limit(limit).all())
 
     def update_status(
-        self, investigation_id: int, status: str, notes: str | None = None, assigned_to: str | None = None
+        self,
+        investigation_id: int,
+        status: str,
+        notes: str | None = None,
+        assigned_to: str | None = None,
     ) -> Investigation | None:
         if status not in self.VALID_STATUSES:
             raise ValueError(f"Invalid status: {status}. Valid: {sorted(self.VALID_STATUSES)}")
@@ -142,9 +152,16 @@ class ModelVersionRepository:
     def __init__(self, session: Session) -> None:
         self.session = session
 
-    def register(self, version: str, algorithm: str, metrics: dict[str, Any] | None = None,
-                 threshold: float | None = None, row_count: int | None = None,
-                 training_duration: float | None = None, status: str = "archived") -> ModelVersion:
+    def register(
+        self,
+        version: str,
+        algorithm: str,
+        metrics: dict[str, Any] | None = None,
+        threshold: float | None = None,
+        row_count: int | None = None,
+        training_duration: float | None = None,
+        status: str = "archived",
+    ) -> ModelVersion:
         record = ModelVersion(
             version=version,
             algorithm=algorithm,
@@ -200,4 +217,6 @@ class BatchJobRepository:
         return job
 
     def list_recent(self, limit: int = 50) -> list[BatchJob]:
-        return list(self.session.query(BatchJob).order_by(desc(BatchJob.created_at)).limit(limit).all())
+        return list(
+            self.session.query(BatchJob).order_by(desc(BatchJob.created_at)).limit(limit).all()
+        )

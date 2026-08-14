@@ -140,10 +140,7 @@ class PredictionService:
         output["fraud_probability"] = result["fraud_probability"].astype(float).round(6)
 
         # Apply risk classification to each row
-        risk_data = [
-            self._risk_classifier.classify(float(p))
-            for p in result["fraud_probability"]
-        ]
+        risk_data = [self._risk_classifier.classify(float(p)) for p in result["fraud_probability"]]
         output["risk_score"] = [r["risk_score"] for r in risk_data]
         output["risk_level"] = [r["risk_level"] for r in risk_data]
         output["decision"] = [r["decision"] for r in risk_data]

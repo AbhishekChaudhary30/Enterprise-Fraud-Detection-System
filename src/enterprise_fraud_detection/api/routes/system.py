@@ -46,12 +46,13 @@ async def ready(request: Request) -> dict[str, Any]:
         from enterprise_fraud_detection.database.connection import get_db
 
         with get_db() as db:
-            db.execute(db.bind.dialect.do_ping(db.connection()) if hasattr(db, 'bind') else None)  # type: ignore[union-attr]
+            db.execute(db.bind.dialect.do_ping(db.connection()) if hasattr(db, "bind") else None)  # type: ignore[union-attr]
             checks["database"] = True
     except Exception:
         try:
-            from enterprise_fraud_detection.database.connection import engine
             from sqlalchemy import text
+
+            from enterprise_fraud_detection.database.connection import engine
 
             with engine.connect() as conn:
                 conn.execute(text("SELECT 1"))

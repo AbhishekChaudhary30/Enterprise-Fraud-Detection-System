@@ -43,7 +43,7 @@ async def predict(
     try:
         with get_db() as db:
             repo = PredictionRepository(db)
-            record = repo.create({**response, "features": payload.features})
+            repo.create({**response, "features": payload.features})
 
             # Auto-create investigation for HIGH risk predictions
             if response["risk_level"] == "HIGH":
@@ -101,7 +101,9 @@ async def upload_csv(
         frame = pd.read_csv(io.BytesIO(content))
     except Exception as exc:
         raise HTTPException(status_code=422, detail=f"Invalid CSV file: {exc}") from exc
-    frame = prediction_service.validate_csv(frame, prediction_service.settings.dataset.target_column)
+    frame = prediction_service.validate_csv(
+        frame, prediction_service.settings.dataset.target_column
+    )
     output, summary = prediction_service.predict_batch(frame, input_reference=file.filename)
     request.app.state.metrics.observe_prediction(len(output), batch=True)
 

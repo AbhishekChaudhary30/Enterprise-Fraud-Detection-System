@@ -6,8 +6,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-
 # --- Authentication ---
+
 
 class LoginResponse(BaseModel):
     """JWT login response."""
@@ -18,6 +18,7 @@ class LoginResponse(BaseModel):
 
 
 # --- Predictions ---
+
 
 class PredictionRequest(BaseModel):
     """Single transaction feature payload."""
@@ -82,6 +83,7 @@ class BatchSummary(BaseModel):
 
 # --- Investigations ---
 
+
 class InvestigationCreate(BaseModel):
     """Create a new investigation for a prediction."""
 
@@ -112,6 +114,7 @@ class InvestigationResponse(BaseModel):
 
 # --- Dashboard ---
 
+
 class DashboardStats(BaseModel):
     """Dashboard KPI statistics."""
 
@@ -127,6 +130,7 @@ class DashboardStats(BaseModel):
 
 # --- Model ---
 
+
 class ModelMetricsResponse(BaseModel):
     """Model evaluation metrics."""
 
@@ -140,6 +144,7 @@ class ModelMetricsResponse(BaseModel):
 
 
 # --- Monitoring ---
+
 
 class MonitoringOverview(BaseModel):
     """System monitoring overview."""
@@ -155,6 +160,7 @@ class MonitoringOverview(BaseModel):
 
 
 # --- Errors ---
+
 
 class ErrorResponse(BaseModel):
     """Consistent API error response."""

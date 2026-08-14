@@ -146,9 +146,16 @@ def _register_model_versions(app: FastAPI) -> None:
             repo = ModelVersionRepository(db)
             for version in versions:
                 try:
-                    existing = db.query(
-                        __import__("enterprise_fraud_detection.database.models", fromlist=["ModelVersion"]).ModelVersion
-                    ).filter_by(version=version).first()
+                    existing = (
+                        db.query(
+                            __import__(
+                                "enterprise_fraud_detection.database.models",
+                                fromlist=["ModelVersion"],
+                            ).ModelVersion
+                        )
+                        .filter_by(version=version)
+                        .first()
+                    )
                     if existing:
                         continue
                     bundle = loader.load(version)

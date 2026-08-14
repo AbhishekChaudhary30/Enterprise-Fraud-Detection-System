@@ -72,9 +72,7 @@ class PredictionExplainer:
                     ]
             else:
                 transformed = engineered.values if hasattr(engineered, "values") else engineered
-                names = self._feature_names or [
-                    f"feature_{i}" for i in range(transformed.shape[1])
-                ]
+                names = self._feature_names or [f"feature_{i}" for i in range(transformed.shape[1])]
 
             shap_values = self._explainer.shap_values(transformed)
 
@@ -92,7 +90,9 @@ class PredictionExplainer:
                         {
                             "feature": names[idx] if idx < len(names) else f"feature_{idx}",
                             "shap_value": round(float(row_shap[idx]), 6),
-                            "direction": "increases_risk" if row_shap[idx] > 0 else "decreases_risk",
+                            "direction": (
+                                "increases_risk" if row_shap[idx] > 0 else "decreases_risk"
+                            ),
                         }
                     )
                 explanations.append(feature_contributions)
