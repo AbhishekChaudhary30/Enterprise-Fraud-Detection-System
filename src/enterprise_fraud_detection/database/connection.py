@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import os
 from collections.abc import Generator
-from contextlib import contextmanager
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
@@ -32,7 +31,6 @@ else:
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 
-@contextmanager
 def get_db() -> Generator[Session, None, None]:
     """Yield a database session and ensure cleanup."""
     session = SessionLocal()

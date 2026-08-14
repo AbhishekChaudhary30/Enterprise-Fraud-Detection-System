@@ -46,10 +46,9 @@ async def ready(request: Request) -> dict[str, Any]:
     # Check database
     try:
         from sqlalchemy import text
+        from enterprise_fraud_detection.database.connection import SessionLocal
 
-        from enterprise_fraud_detection.database.connection import get_db
-
-        with get_db() as db:
+        with SessionLocal() as db:
             db.execute(text("SELECT 1"))
             checks["database"] = True
     except Exception:
