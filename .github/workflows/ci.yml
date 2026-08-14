@@ -27,9 +27,5 @@ jobs:
         run: black --check src scripts tests
       - name: Mypy
         run: mypy src
-      - name: Unit tests
-        run: pytest -m unit -q
-      - name: Integration tests
-        run: pytest -m integration -q
-      - name: End-to-end tests
-        run: pytest -m e2e -q
+      - name: Run Tests
+        run: pytest -q
