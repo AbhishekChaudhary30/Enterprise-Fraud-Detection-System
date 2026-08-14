@@ -1,0 +1,185 @@
+{
+  "version": "v3",
+  "timestamp_utc": "2026-08-07T20:17:37.398193+00:00",
+  "selected_model": "catboost",
+  "row_count": 284807,
+  "training_duration_seconds": 234.19769919998362,
+  "training_configuration": {
+    "random_state": 42,
+    "test_size": 0.2,
+    "validation_size": 0.2,
+    "smote_enabled": false,
+    "selection_metric": "average_precision",
+    "search_type": "randomized",
+    "cv_folds": 3,
+    "randomized_iterations": 2,
+    "selected_features": [],
+    "drop_features": [],
+    "derived_features": [],
+    "models": {
+      "logistic_regression": {
+        "enabled": true,
+        "class_weight": "balanced",
+        "max_iter": 1000,
+        "c": [
+          0.1,
+          1.0
+        ]
+      },
+      "random_forest": {
+        "enabled": true,
+        "n_estimators": [
+          100
+        ],
+        "max_depth": [
+          12
+        ],
+        "min_samples_leaf": [
+          1
+        ],
+        "class_weight": "balanced_subsample"
+      },
+      "xgboost": {
+        "enabled": true,
+        "n_estimators": [
+          100
+        ],
+        "max_depth": [
+          6
+        ],
+        "learning_rate": [
+          0.1
+        ],
+        "subsample": [
+          0.9
+        ],
+        "colsample_bytree": [
+          0.9
+        ]
+      },
+      "lightgbm": {
+        "enabled": true,
+        "n_estimators": [
+          100
+        ],
+        "num_leaves": [
+          31
+        ],
+        "learning_rate": [
+          0.1
+        ]
+      },
+      "catboost": {
+        "enabled": true,
+        "iterations": [
+          100
+        ],
+        "depth": [
+          6
+        ],
+        "learning_rate": [
+          0.1
+        ]
+      }
+    }
+  },
+  "comparisons": [
+    {
+      "model_name": "logistic_regression",
+      "validation_metrics": {
+        "average_precision": 0.7876994453867551,
+        "roc_auc": 0.9792632906895036,
+        "f1": 0.10161386730424388,
+        "balanced_accuracy": 0.9389416610925349,
+        "precision": 0.05383153894870171,
+        "recall": 0.9042553191489362
+      },
+      "test_metrics": {},
+      "best_params": {
+        "model__C": 0.1
+      },
+      "duration_seconds": 15.415127999993274
+    },
+    {
+      "model_name": "random_forest",
+      "validation_metrics": {
+        "average_precision": 0.8569303474395793,
+        "roc_auc": 0.9474643552892156,
+        "f1": 0.8681318681318682,
+        "balanced_accuracy": 0.9201333322316521,
+        "precision": 0.8977272727272727,
+        "recall": 0.8404255319148937
+      },
+      "test_metrics": {},
+      "best_params": {
+        "model__n_estimators": 100,
+        "model__min_samples_leaf": 1,
+        "model__max_depth": 12
+      },
+      "duration_seconds": 144.80599160000565
+    },
+    {
+      "model_name": "xgboost",
+      "validation_metrics": {
+        "average_precision": 0.8779070313009967,
+        "roc_auc": 0.9724308635516377,
+        "f1": 0.9028571428571428,
+        "balanced_accuracy": 0.9201951140183813,
+        "precision": 0.9753086419753086,
+        "recall": 0.8404255319148937
+      },
+      "test_metrics": {},
+      "best_params": {
+        "model__subsample": 0.9,
+        "model__n_estimators": 100,
+        "model__max_depth": 6,
+        "model__learning_rate": 0.1,
+        "model__colsample_bytree": 0.9
+      },
+      "duration_seconds": 19.071826400002465
+    },
+    {
+      "model_name": "lightgbm",
+      "validation_metrics": {
+        "average_precision": 0.3267918196118919,
+        "roc_auc": 0.8536786641012515,
+        "f1": 0.45714285714285713,
+        "balanced_accuracy": 0.8393487636318977,
+        "precision": 0.34408602150537637,
+        "recall": 0.6808510638297872
+      },
+      "test_metrics": {},
+      "best_params": {
+        "model__num_leaves": 31,
+        "model__n_estimators": 100,
+        "model__learning_rate": 0.1
+      },
+      "duration_seconds": 13.00031289999606
+    },
+    {
+      "model_name": "catboost",
+      "validation_metrics": {
+        "average_precision": 0.8861297620396792,
+        "roc_auc": 0.969464962215461,
+        "f1": 0.8926553672316384,
+        "balanced_accuracy": 0.9201774620793158,
+        "precision": 0.9518072289156626,
+        "recall": 0.8404255319148937
+      },
+      "test_metrics": {
+        "average_precision": 0.8089974478900193,
+        "roc_auc": 0.9740598252086413,
+        "f1": 0.8383233532934131,
+        "balanced_accuracy": 0.8684034006925134,
+        "precision": 0.9722222222222222,
+        "recall": 0.7368421052631579
+      },
+      "best_params": {
+        "model__learning_rate": 0.1,
+        "model__iterations": 100,
+        "model__depth": 6
+      },
+      "duration_seconds": 28.095549399993615
+    }
+  ]
+}

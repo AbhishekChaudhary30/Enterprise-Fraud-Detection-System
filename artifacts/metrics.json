@@ -1,0 +1,16 @@
+{
+  "started_at": "2026-08-14T15:59:11.361357+00:00",
+  "request_count": 93,
+  "error_count": 0,
+  "prediction_count": 2,
+  "batch_prediction_count": 0,
+  "total_prediction_rows": 2,
+  "total_latency_ms": 80766.60020000508,
+  "last_latency_ms": 161.22469899983116,
+  "last_status_code": 200,
+  "average_latency_ms": 868.4580666667213,
+  "timestamp": "2026-08-14T16:22:57.927455+00:00",
+  "process_id": 1,
+  "memory_rss_bytes": 382275584,
+  "cpu_time_seconds": 90.4191864
+}
