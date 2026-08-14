@@ -30,7 +30,8 @@ async def list_investigations(
     """List investigations with optional status filter."""
     del user
     with get_db() as db:
-        repo = InvestigationRepository(db)
+        user_id = int(user["user_id"]) if "user_id" in user else None
+        repo = InvestigationRepository(db, user_id=user_id)
         investigations = repo.list_all(limit=limit, status=status)
         counts = repo.count_by_status()
         return {
@@ -59,11 +60,12 @@ async def create_investigation(
     """Create an investigation for a high-risk prediction."""
     del user
     with get_db() as db:
-        pred_repo = PredictionRepository(db)
+        user_id = int(user["user_id"]) if "user_id" in user else None
+        pred_repo = PredictionRepository(db, user_id=user_id)
         prediction = pred_repo.get_by_id(payload.prediction_id)
         if prediction is None:
             raise HTTPException(status_code=404, detail="Prediction not found")
-        inv_repo = InvestigationRepository(db)
+        inv_repo = InvestigationRepository(db, user_id=user_id)
         existing = inv_repo.get_by_prediction_id(payload.prediction_id)
         if existing:
             raise HTTPException(
@@ -87,11 +89,12 @@ async def get_investigation(
     """Get a single investigation with linked prediction details."""
     del user
     with get_db() as db:
-        inv_repo = InvestigationRepository(db)
+        user_id = int(user["user_id"]) if "user_id" in user else None
+        inv_repo = InvestigationRepository(db, user_id=user_id)
         investigation = inv_repo.get_by_id(investigation_id)
         if investigation is None:
             raise HTTPException(status_code=404, detail="Investigation not found")
-        pred_repo = PredictionRepository(db)
+        pred_repo = PredictionRepository(db, user_id=user_id)
         prediction = pred_repo.get_by_id(investigation.prediction_id)
         pred_data = None
         if prediction:
@@ -129,7 +132,8 @@ async def update_investigation(
     """Update an investigation status in the workflow."""
     del user
     with get_db() as db:
-        repo = InvestigationRepository(db)
+        user_id = int(user["user_id"]) if "user_id" in user else None
+        repo = InvestigationRepository(db, user_id=user_id)
         investigation = repo.update_status(
             investigation_id, payload.status, payload.notes, payload.assigned_to
         )

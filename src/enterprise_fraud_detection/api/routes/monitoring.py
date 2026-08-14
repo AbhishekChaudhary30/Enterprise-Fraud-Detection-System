@@ -32,8 +32,9 @@ async def dashboard_stats(
     bundle = loader.load()
 
     with get_db() as db:
-        pred_repo = PredictionRepository(db)
-        inv_repo = InvestigationRepository(db)
+        user_id = int(user["user_id"]) if "user_id" in user else None
+        pred_repo = PredictionRepository(db, user_id=user_id)
+        inv_repo = InvestigationRepository(db, user_id=user_id)
         total = pred_repo.count_total()
         fraud = pred_repo.count_fraud()
         risk_dist = pred_repo.count_by_risk_level()
@@ -70,7 +71,8 @@ async def dashboard_recent(
     """Recent predictions for the dashboard table."""
     del user
     with get_db() as db:
-        pred_repo = PredictionRepository(db)
+        user_id = int(user["user_id"]) if "user_id" in user else None
+        pred_repo = PredictionRepository(db, user_id=user_id)
         recent = pred_repo.list_recent(limit=20)
         return {
             "predictions": [
@@ -95,7 +97,8 @@ async def dashboard_high_risk(
     """High-risk predictions requiring attention."""
     del user
     with get_db() as db:
-        pred_repo = PredictionRepository(db)
+        user_id = int(user["user_id"]) if "user_id" in user else None
+        pred_repo = PredictionRepository(db, user_id=user_id)
         high_risk = pred_repo.list_recent(limit=20, risk_level="HIGH")
         return {
             "predictions": [
@@ -132,7 +135,8 @@ async def monitoring_overview(
         model_loaded = False
 
     with get_db() as db:
-        pred_repo = PredictionRepository(db)
+        user_id = int(user["user_id"]) if "user_id" in user else None
+        pred_repo = PredictionRepository(db, user_id=user_id)
         total = pred_repo.count_total()
         fraud = pred_repo.count_fraud()
         risk_dist = pred_repo.count_by_risk_level()
@@ -212,7 +216,8 @@ async def list_batch_jobs(
     """List recent batch prediction jobs."""
     del user
     with get_db() as db:
-        repo = BatchJobRepository(db)
+        user_id = int(user["user_id"]) if "user_id" in user else None
+        repo = BatchJobRepository(db, user_id=user_id)
         jobs = repo.list_recent(limit=50)
         return {
             "jobs": [

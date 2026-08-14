@@ -4,6 +4,7 @@ import { api } from '../services/api';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [isRegistering, setIsRegistering] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -14,10 +15,27 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await api.login(username, password);
+      if (isRegistering) {
+        await api.register(username, password);
+      } else {
+        await api.login(username, password);
+      }
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Authentication failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGuestLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await api.loginGuest();
       navigate('/dashboard');
     } catch {
-      setError('Invalid username or password');
+      setError('Failed to load demo mode');
     } finally {
       setLoading(false);
     }
@@ -128,7 +146,45 @@ export default function LoginPage() {
               transition: 'all 0.2s ease',
             }}
           >
-            {loading ? 'Authenticating...' : 'Sign In'}
+            {loading ? 'Authenticating...' : (isRegistering ? 'Create Account' : 'Sign In')}
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => setIsRegistering(!isRegistering)}
+            style={{
+              background: 'transparent',
+              color: '#94a3b8',
+              border: 'none',
+              fontSize: '13px',
+              cursor: 'pointer',
+              marginTop: '4px',
+              textDecoration: 'underline',
+            }}
+          >
+            {isRegistering ? 'Already have an account? Sign In' : 'Need an account? Register'}
+          </button>
+          
+          <div style={{ margin: '8px 0', borderBottom: '1px solid #334155' }} />
+
+          <button
+            type="button"
+            onClick={handleGuestLogin}
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '12px',
+              background: 'rgba(99, 102, 241, 0.1)',
+              color: '#818cf8',
+              border: '1px solid rgba(99, 102, 241, 0.3)',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: 600,
+              cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            Explore Demo (No Login Required)
           </button>
         </form>
       </div>

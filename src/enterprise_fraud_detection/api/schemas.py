@@ -17,6 +17,13 @@ class LoginResponse(BaseModel):
     role: str
 
 
+class RegisterRequest(BaseModel):
+    """User registration payload."""
+    
+    username: str
+    password: str
+
+
 # --- Predictions ---
 
 

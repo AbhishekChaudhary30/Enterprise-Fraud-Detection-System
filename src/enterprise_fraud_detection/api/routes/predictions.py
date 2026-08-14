@@ -42,12 +42,13 @@ async def predict(
     # Persist to database
     try:
         with get_db() as db:
-            repo = PredictionRepository(db)
+            user_id = int(user["user_id"]) if "user_id" in user else None
+            repo = PredictionRepository(db, user_id=user_id)
             repo.create({**response, "features": payload.features})
 
             # Auto-create investigation for HIGH risk predictions
             if response["risk_level"] == "HIGH":
-                inv_repo = InvestigationRepository(db)
+                inv_repo = InvestigationRepository(db, user_id=user_id)
                 inv_repo.create(response["prediction_id"], priority="HIGH")
             db.commit()
     except Exception:
@@ -74,7 +75,8 @@ async def predict_batch(
     # Persist batch job to database
     try:
         with get_db() as db:
-            repo = BatchJobRepository(db)
+            user_id = int(user["user_id"]) if "user_id" in user else None
+            repo = BatchJobRepository(db, user_id=user_id)
             repo.create(summary)
             db.commit()
     except Exception:
@@ -110,7 +112,8 @@ async def upload_csv(
     # Persist batch job to database
     try:
         with get_db() as db:
-            repo = BatchJobRepository(db)
+            user_id = int(user["user_id"]) if "user_id" in user else None
+            repo = BatchJobRepository(db, user_id=user_id)
             repo.create(summary)
             db.commit()
     except Exception:
@@ -140,7 +143,8 @@ async def history(
     # Try database first, fall back to file-based history
     try:
         with get_db() as db:
-            repo = PredictionRepository(db)
+            user_id = int(user["user_id"]) if "user_id" in user else None
+            repo = PredictionRepository(db, user_id=user_id)
             records = repo.list_recent(limit=limit)
             if records:
                 return {

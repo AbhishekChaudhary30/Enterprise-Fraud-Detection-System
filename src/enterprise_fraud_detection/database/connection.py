@@ -47,7 +47,25 @@ def get_db() -> Generator[Session, None, None]:
 
 
 def init_db() -> None:
-    """Create all tables if they do not exist."""
+    """Create all tables if they do not exist, and auto-migrate user_id columns."""
     from enterprise_fraud_detection.database.models import Base
+    from sqlalchemy import text
 
     Base.metadata.create_all(bind=engine)
+    
+    # Auto-migration for existing databases (adds user_id if missing)
+    with engine.begin() as conn:
+        try:
+            conn.execute(text("ALTER TABLE predictions ADD COLUMN user_id INTEGER REFERENCES users(id)"))
+        except Exception:
+            pass  # Column likely exists
+            
+        try:
+            conn.execute(text("ALTER TABLE investigations ADD COLUMN user_id INTEGER REFERENCES users(id)"))
+        except Exception:
+            pass
+            
+        try:
+            conn.execute(text("ALTER TABLE batch_jobs ADD COLUMN user_id INTEGER REFERENCES users(id)"))
+        except Exception:
+            pass

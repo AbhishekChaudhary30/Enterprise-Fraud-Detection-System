@@ -67,6 +67,33 @@ class ApiService {
     return data;
   }
 
+  async register(username: string, password: string) {
+    const response = await fetch(`${API_BASE}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: 'Registration failed' }));
+      throw new Error(error.detail);
+    }
+    const data = await response.json();
+    this.setToken(data.access_token);
+    return data;
+  }
+
+  async loginGuest() {
+    const response = await fetch(`${API_BASE}/guest`, {
+      method: 'POST',
+    });
+
+    if (!response.ok) throw new Error('Guest login failed');
+    const data = await response.json();
+    this.setToken(data.access_token);
+    return data;
+  }
+
   // Predictions
   async predict(features: Record<string, number>, threshold?: number) {
     return this.request('POST', '/predict', { features, threshold });

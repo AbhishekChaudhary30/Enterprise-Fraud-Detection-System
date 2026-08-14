@@ -31,11 +31,14 @@ class AuthService:
         return {"username": username, "role": "admin"}
 
     def create_access_token(self, subject: dict[str, str]) -> str:
-        """Create a signed access token containing identity and role."""
+        """Create a signed access token containing identity, role, and user_id."""
         expires = datetime.now(UTC) + timedelta(
             minutes=self.settings.serving.access_token_expire_minutes
         )
         payload = {"sub": subject["username"], "role": subject["role"], "exp": expires}
+        if "user_id" in subject:
+            payload["user_id"] = subject["user_id"]
+            
         return cast(
             str,
             jwt.encode(
@@ -62,6 +65,11 @@ class AuthService:
             role = payload.get("role")
             if not isinstance(username, str) or not isinstance(role, str):
                 raise credentials_error
-            return {"username": username, "role": role}
+                
+            user_data = {"username": username, "role": role}
+            if "user_id" in payload:
+                user_data["user_id"] = str(payload["user_id"])
+                
+            return user_data
         except JWTError as error:
             raise credentials_error from error

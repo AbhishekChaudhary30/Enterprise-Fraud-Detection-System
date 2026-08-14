@@ -20,12 +20,20 @@ from enterprise_fraud_detection.database.models import (
 class PredictionRepository:
     """CRUD operations for prediction records."""
 
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: Session, user_id: int | None = None) -> None:
         self.session = session
+        self.user_id = user_id
+
+    def _base_query(self):
+        query = self.session.query(PredictionRecord)
+        if self.user_id is not None:
+            query = query.filter(PredictionRecord.user_id == self.user_id)
+        return query
 
     def create(self, data: dict[str, Any]) -> PredictionRecord:
         """Insert a new prediction record."""
         record = PredictionRecord(
+            user_id=self.user_id,
             prediction_id=data["prediction_id"],
             prediction_timestamp=datetime.fromisoformat(data["prediction_timestamp"]),
             model_version=data["model_version"],
@@ -52,37 +60,37 @@ class PredictionRepository:
         return record
 
     def get_by_id(self, prediction_id: str) -> PredictionRecord | None:
-        return self.session.query(PredictionRecord).filter_by(prediction_id=prediction_id).first()
+        return self._base_query().filter_by(prediction_id=prediction_id).first()
 
     def list_recent(
         self, limit: int = 100, risk_level: str | None = None
     ) -> list[PredictionRecord]:
-        query = self.session.query(PredictionRecord)
+        query = self._base_query()
         if risk_level:
             query = query.filter_by(risk_level=risk_level)
         return list(query.order_by(desc(PredictionRecord.prediction_timestamp)).limit(limit).all())
 
     def count_by_risk_level(self) -> dict[str, int]:
         results = (
-            self.session.query(PredictionRecord.risk_level, func.count())
+            self._base_query().with_entities(PredictionRecord.risk_level, func.count())
             .group_by(PredictionRecord.risk_level)
             .all()
         )
         return {level: count for level, count in results}
 
     def count_total(self) -> int:
-        return self.session.query(func.count(PredictionRecord.id)).scalar() or 0
+        return self._base_query().with_entities(func.count(PredictionRecord.id)).scalar() or 0
 
     def count_fraud(self) -> int:
         return (
-            self.session.query(func.count(PredictionRecord.id))
+            self._base_query().with_entities(func.count(PredictionRecord.id))
             .filter(PredictionRecord.predicted_label == 1)
             .scalar()
             or 0
         )
 
     def avg_probability(self) -> float:
-        result = self.session.query(func.avg(PredictionRecord.fraud_probability)).scalar()
+        result = self._base_query().with_entities(func.avg(PredictionRecord.fraud_probability)).scalar()
         return float(result) if result else 0.0
 
 
@@ -91,11 +99,19 @@ class InvestigationRepository:
 
     VALID_STATUSES = {"NEW", "UNDER_REVIEW", "CONFIRMED_FRAUD", "FALSE_POSITIVE", "RESOLVED"}
 
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: Session, user_id: int | None = None) -> None:
         self.session = session
+        self.user_id = user_id
+
+    def _base_query(self):
+        query = self.session.query(Investigation)
+        if self.user_id is not None:
+            query = query.filter(Investigation.user_id == self.user_id)
+        return query
 
     def create(self, prediction_id: str, priority: str = "MEDIUM") -> Investigation:
         investigation = Investigation(
+            user_id=self.user_id,
             prediction_id=prediction_id,
             status="NEW",
             priority=priority,
@@ -105,13 +121,13 @@ class InvestigationRepository:
         return investigation
 
     def get_by_id(self, investigation_id: int) -> Investigation | None:
-        return self.session.query(Investigation).filter_by(id=investigation_id).first()
+        return self._base_query().filter_by(id=investigation_id).first()
 
     def get_by_prediction_id(self, prediction_id: str) -> Investigation | None:
-        return self.session.query(Investigation).filter_by(prediction_id=prediction_id).first()
+        return self._base_query().filter_by(prediction_id=prediction_id).first()
 
     def list_all(self, limit: int = 100, status: str | None = None) -> list[Investigation]:
-        query = self.session.query(Investigation)
+        query = self._base_query()
         if status:
             query = query.filter_by(status=status)
         return list(query.order_by(desc(Investigation.created_at)).limit(limit).all())
@@ -139,7 +155,7 @@ class InvestigationRepository:
 
     def count_by_status(self) -> dict[str, int]:
         results = (
-            self.session.query(Investigation.status, func.count())
+            self._base_query().with_entities(Investigation.status, func.count())
             .group_by(Investigation.status)
             .all()
         )
@@ -147,10 +163,11 @@ class InvestigationRepository:
 
 
 class ModelVersionRepository:
-    """CRUD operations for model version registry."""
+    """CRUD operations for model version registry. (Global, no tenant isolation needed)"""
 
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: Session, user_id: int | None = None) -> None:
         self.session = session
+        # Model versions are global across all tenants
 
     def register(
         self,
@@ -182,11 +199,9 @@ class ModelVersionRepository:
         return list(self.session.query(ModelVersion).order_by(desc(ModelVersion.created_at)).all())
 
     def set_champion(self, version: str) -> ModelVersion | None:
-        # Demote current champion
         current = self.get_champion()
         if current:
             current.status = "archived"
-        # Promote new champion
         model = self.session.query(ModelVersion).filter_by(version=version).first()
         if model:
             model.status = "champion"
@@ -197,11 +212,19 @@ class ModelVersionRepository:
 class BatchJobRepository:
     """CRUD operations for batch prediction jobs."""
 
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: Session, user_id: int | None = None) -> None:
         self.session = session
+        self.user_id = user_id
+
+    def _base_query(self):
+        query = self.session.query(BatchJob)
+        if self.user_id is not None:
+            query = query.filter(BatchJob.user_id == self.user_id)
+        return query
 
     def create(self, data: dict[str, Any]) -> BatchJob:
         job = BatchJob(
+            user_id=self.user_id,
             batch_id=data["prediction_id"],
             total_rows=data["total_transactions"],
             fraud_count=data["fraud_predictions"],
@@ -218,5 +241,5 @@ class BatchJobRepository:
 
     def list_recent(self, limit: int = 50) -> list[BatchJob]:
         return list(
-            self.session.query(BatchJob).order_by(desc(BatchJob.created_at)).limit(limit).all()
+            self._base_query().order_by(desc(BatchJob.created_at)).limit(limit).all()
         )
