@@ -29,6 +29,7 @@ dependencies = [
     "uvicorn[standard]>=0.32",
     "python-jose[cryptography]>=3.3",
     "passlib[bcrypt]>=1.7",
+    "bcrypt<4.0.0",
     "python-multipart>=0.0.12",
     "streamlit>=1.40",
     "psutil>=6.1",
