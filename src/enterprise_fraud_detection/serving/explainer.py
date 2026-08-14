@@ -43,7 +43,7 @@ class PredictionExplainer:
                 logger.warning("SHAP explainer initialization failed; explanations unavailable")
                 self._explainer = None
 
-    def explain(self, raw_features: pd.DataFrame) -> list[dict[str, Any]]:
+    def explain(self, raw_features: pd.DataFrame) -> list[list[dict[str, Any]]]:
         """Generate SHAP explanations for pre-pipeline feature rows.
 
         Applies the pipeline's feature engineering and preprocessing steps,
@@ -100,4 +100,5 @@ class PredictionExplainer:
 
         except Exception as exc:
             logger.warning("SHAP explanation failed: {}", exc)
-            return [[] for _ in range(len(raw_features))]
+            fallback: list[list[dict[str, Any]]] = [[] for _ in range(len(raw_features))]
+            return fallback

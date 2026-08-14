@@ -16,9 +16,6 @@ def test_login_and_protected_route(api_client) -> None:
     assert protected.status_code == 200
 
 
-
-
-
 def test_protected_route_rejects_anonymous(api_client) -> None:
     """Protected model metadata rejects missing bearer credentials."""
     assert api_client.get("/api/v1/models").status_code == 401

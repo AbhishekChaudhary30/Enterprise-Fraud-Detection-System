@@ -90,7 +90,8 @@ class PredictionService:
 
         # Generate SHAP explanation
         explainer = self._get_explainer(bundle)
-        explanations = explainer.explain(frame) if explainer else [[]]
+        fallback: list[list[dict[str, Any]]] = [[]]
+        explanations = explainer.explain(frame) if explainer else fallback
         explanation = explanations[0] if explanations else []
 
         # Risk classification

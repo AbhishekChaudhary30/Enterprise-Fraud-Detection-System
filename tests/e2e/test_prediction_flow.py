@@ -7,7 +7,9 @@ pytestmark = pytest.mark.e2e
 
 def test_public_prediction_flow(api_client) -> None:
     """A client can authenticate, discover a model, and score synthetic data."""
-    login = api_client.post("/api/v1/login", data={"username": "admin", "password": "test-password"})
+    login = api_client.post(
+        "/api/v1/login", data={"username": "admin", "password": "test-password"}
+    )
     assert login.status_code == 200
     headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
     models = api_client.get("/api/v1/models/latest", headers=headers)
