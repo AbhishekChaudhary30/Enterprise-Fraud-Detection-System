@@ -7,6 +7,7 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .pytest_cache/
+.pytest-tmp/
 .coverage
 .streamlit/
 catboost_info/
@@ -31,12 +32,19 @@ data/external/*
 !data/external/.gitkeep
 reports/*
 !reports/.gitkeep
-reports/figures/*
-!reports/figures/.gitkeep
-reports/drift/*
-reports/benchmarks/*
-figures/*
-!figures/.gitkeep
+
+# Database
+*.db
+*.sqlite3
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
 
 # Editors and operating systems
 .vscode/
