@@ -5,7 +5,9 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
+from sqlalchemy.orm import Session
+from enterprise_fraud_detection.database.connection import get_db
 
 router = APIRouter()
 
@@ -68,3 +70,28 @@ async def ready(request: Request) -> dict[str, Any]:
         "timestamp": datetime.now(UTC).isoformat(),
         "checks": checks,
     }
+
+
+@router.get("/debug")
+async def debug(request: Request, db: Session = Depends(get_db)) -> dict[str, Any]:
+    """Debug endpoint to trace where the 500 error happens."""
+    results = {}
+    import traceback
+    
+    # Test passlib hashing
+    try:
+        auth = request.app.state.auth
+        pw_hash = auth.password_context.hash("test_password")
+        results["passlib"] = "success"
+    except Exception as e:
+        results["passlib_error"] = traceback.format_exc()
+        
+    # Test DB User table
+    try:
+        from enterprise_fraud_detection.database.models import User
+        users = db.query(User).limit(1).all()
+        results["db_users"] = f"success, count: {len(users)}"
+    except Exception as e:
+        results["db_error"] = traceback.format_exc()
+        
+    return results
