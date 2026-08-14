@@ -35,8 +35,12 @@ export default function LoginPage() {
     try {
       await api.loginGuest();
       navigate('/dashboard');
-    } catch {
-      setError('Failed to load demo mode');
+    } catch (err: any) {
+      if (err.response && err.response.data && err.response.data.detail) {
+          setError('Backend Error: ' + err.response.data.detail);
+      } else {
+          setError(err.message || 'Failed to load demo mode');
+      }
     } finally {
       setLoading(false);
     }
