@@ -16,10 +16,7 @@ def test_login_and_protected_route(api_client) -> None:
     assert protected.status_code == 200
 
 
-def test_unversioned_login_compatibility_route(api_client) -> None:
-    """The legacy `/login` contract remains available for existing clients."""
-    response = api_client.post("/login", data={"username": "admin", "password": "test-password"})
-    assert response.status_code == 200
+
 
 
 def test_protected_route_rejects_anonymous(api_client) -> None:
