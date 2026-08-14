@@ -56,6 +56,7 @@ def create_app() -> FastAPI:
     app.state.metrics = MetricsRegistry(settings.production.metrics_path)
 
     # CORS for React frontend
+    # app.add_middleware(RequestLoggingMiddleware),
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -97,6 +98,11 @@ def create_app() -> FastAPI:
     async def value_error_handler(request: Request, exc: ValueError) -> JSONResponse:
         del request
         return JSONResponse(status_code=422, content={"detail": str(exc)})
+
+    @app.exception_handler(Exception)
+    async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+        import traceback
+        return JSONResponse(status_code=500, content={"detail": "Internal Server Error", "traceback": traceback.format_exc()})
 
     @app.exception_handler(FileNotFoundError)
     async def not_found_handler(request: Request, exc: FileNotFoundError) -> JSONResponse:

@@ -73,7 +73,7 @@ async def ready(request: Request) -> dict[str, Any]:
 
 
 @router.get("/debug")
-async def debug(request: Request, db: Session = Depends(get_db)) -> dict[str, Any]:
+async def debug(request: Request) -> dict[str, Any]:
     """Debug endpoint to trace where the 500 error happens."""
     results = {}
     import traceback
@@ -88,9 +88,11 @@ async def debug(request: Request, db: Session = Depends(get_db)) -> dict[str, An
         
     # Test DB User table
     try:
-        from enterprise_fraud_detection.database.models import User
-        users = db.query(User).limit(1).all()
-        results["db_users"] = f"success, count: {len(users)}"
+        from enterprise_fraud_detection.database.connection import SessionLocal
+        with SessionLocal() as db:
+            from enterprise_fraud_detection.database.models import User
+            users = db.query(User).limit(1).all()
+            results["db_users"] = f"success, count: {len(users)}"
     except Exception as e:
         results["db_error"] = traceback.format_exc()
         
