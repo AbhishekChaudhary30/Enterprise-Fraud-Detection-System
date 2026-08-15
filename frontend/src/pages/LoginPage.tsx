@@ -38,8 +38,7 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      const data = await api.guestAccess() as { access_token: string };
-      api.setToken(data.access_token);
+      await api.loginGuest();
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Guest access failed');
