@@ -85,7 +85,7 @@ async def debug(request: Request) -> dict[str, Any]:
     except Exception as e:
         results["passlib_error"] = traceback.format_exc()
         
-    # Test DB User table
+        # Test DB User table
     try:
         from enterprise_fraud_detection.database.connection import SessionLocal
         with SessionLocal() as db:
@@ -94,5 +94,14 @@ async def debug(request: Request) -> dict[str, Any]:
             results["db_users"] = f"success, count: {len(users)}"
     except Exception as e:
         results["db_error"] = traceback.format_exc()
+        
+    try:
+        from enterprise_fraud_detection.database.connection import engine
+        from sqlalchemy import text
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE predictions ADD COLUMN is_archived BOOLEAN DEFAULT FALSE"))
+            results["alter_table"] = "success"
+    except Exception as e:
+        results["alter_table_error"] = traceback.format_exc()
         
     return results
