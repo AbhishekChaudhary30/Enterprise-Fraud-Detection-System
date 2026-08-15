@@ -24,10 +24,12 @@ class PredictionRepository:
         self.session = session
         self.user_id = user_id
 
-    def _base_query(self):
+    def _base_query(self, include_archived: bool = False):
         query = self.session.query(PredictionRecord)
         if self.user_id is not None:
             query = query.filter(PredictionRecord.user_id == self.user_id)
+        if not include_archived:
+            query = query.filter(PredictionRecord.is_archived == False)
         return query
 
     def create(self, data: dict[str, Any]) -> PredictionRecord:
@@ -92,6 +94,37 @@ class PredictionRepository:
     def avg_probability(self) -> float:
         result = self._base_query().with_entities(func.avg(PredictionRecord.fraud_probability)).scalar()
         return float(result) if result else 0.0
+
+    def list_all(self, limit: int = 1000) -> list[PredictionRecord]:
+        return list(
+            self._base_query(include_archived=True)
+            .order_by(desc(PredictionRecord.prediction_timestamp))
+            .limit(limit)
+            .all()
+        )
+
+    def archive_all(self) -> int:
+        records = self._base_query().all()
+        count = 0
+        for record in records:
+            record.is_archived = True
+            count += 1
+        self.session.flush()
+        return count
+
+    def delete_permanently(self, prediction_id: str) -> bool:
+        record = self._base_query(include_archived=True).filter_by(prediction_id=prediction_id).first()
+        if not record:
+            return False
+        
+        # Also delete associated investigations to prevent foreign key constraint errors
+        investigation = self.session.query(Investigation).filter_by(prediction_id=prediction_id).first()
+        if investigation:
+            self.session.delete(investigation)
+            
+        self.session.delete(record)
+        self.session.flush()
+        return True
 
 
 class InvestigationRepository:

@@ -141,7 +141,7 @@ async def history(
         with SessionLocal() as db:
             user_id = int(user["user_id"]) if "user_id" in user else None
             repo = PredictionRepository(db, user_id=user_id)
-            records = repo.list_recent(limit=limit)
+            records = repo.list_all(limit=limit)
             if records:
                 return {
                     "history": [
@@ -163,3 +163,17 @@ async def history(
         pass
 
     return {"history": prediction_service.history(limit)}
+
+@router.delete("/predictions/{prediction_id}")
+async def delete_prediction(
+    prediction_id: str,
+    user: Annotated[dict[str, str], Depends(current_user)],
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Permanently delete a prediction and associated investigations."""
+    user_id = int(user["user_id"]) if "user_id" in user else None
+    repo = PredictionRepository(db, user_id=user_id)
+    success = repo.delete_permanently(prediction_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Prediction not found")
+    return {"status": "success", "message": "Prediction deleted permanently"}

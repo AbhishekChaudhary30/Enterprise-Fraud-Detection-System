@@ -134,9 +134,17 @@ class ApiService {
     return this.request('GET', '/dashboard/high-risk');
   }
 
-  // History
+  // History & Reset
+  async resetDashboard() {
+    return this.request('POST', '/dashboard/reset');
+  }
+
   async getHistory(limit = 100) {
     return this.request('GET', `/history?limit=${limit}`);
+  }
+
+  async deletePrediction(predictionId: string) {
+    return this.request('DELETE', `/predictions/${predictionId}`);
   }
 
   // Investigations

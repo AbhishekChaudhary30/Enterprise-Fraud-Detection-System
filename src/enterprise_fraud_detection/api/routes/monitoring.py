@@ -46,11 +46,29 @@ async def dashboard_stats(
     avg_prob = pred_repo.avg_probability()
     inv_counts = inv_repo.count_by_status()
 
-    # Load evaluation metrics if available
+    # Load evaluation metrics from bundle metadata
     metrics: dict[str, float] = {}
-    eval_path = request.app.state.settings.evaluation.output_directory / "metrics.json"
-    if eval_path.exists():
-        metrics = json.loads(eval_path.read_text(encoding="utf-8"))
+    try:
+        if "bundle" in locals() and hasattr(bundle, "metadata"):
+            comparisons = bundle.metadata.get("comparisons", [])
+            for comp in comparisons:
+                if comp.get("model_name") == model_algorithm and comp.get("test_metrics"):
+                    metrics = comp["test_metrics"]
+                    break
+    except Exception:
+        pass
+
+@router.post("/dashboard/reset")
+async def dashboard_reset(
+    user: Annotated[dict[str, str], Depends(current_user)],
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Reset the dashboard by archiving all current predictions."""
+    user_id = int(user["user_id"]) if "user_id" in user else None
+    pred_repo = PredictionRepository(db, user_id=user_id)
+    archived_count = pred_repo.archive_all()
+    return {"status": "success", "archived_count": archived_count}
+
 
     return {
         "total_predictions": total,
@@ -181,10 +199,23 @@ async def monitoring_model_metrics(
     user: Annotated[dict[str, str], Depends(current_user)],
 ) -> dict[str, Any]:
     """Current champion model evaluation metrics."""
-    eval_path = request.app.state.settings.evaluation.output_directory / "metrics.json"
-    if not eval_path.exists():
-        return {"metrics": {}, "available": False}
-    metrics = json.loads(eval_path.read_text(encoding="utf-8"))
+    loader = request.app.state.loader
+    try:
+        bundle = loader.load()
+        model_version = bundle.version
+        model_algorithm = bundle.metadata.get("selected_model", "unknown")
+    except Exception:
+        model_version = "None loaded"
+        model_algorithm = "N/A"
+        bundle = None
+
+    metrics = {}
+    if bundle and hasattr(bundle, "metadata"):
+        comparisons = bundle.metadata.get("comparisons", [])
+        for comp in comparisons:
+            if comp.get("model_name") == model_algorithm and comp.get("test_metrics"):
+                metrics = comp["test_metrics"]
+                break
 
     # Load threshold report if available
     threshold_path = request.app.state.settings.evaluation.output_directory / "threshold_report.csv"
@@ -196,15 +227,6 @@ async def monitoring_model_metrics(
             reader = csv.DictReader(f)
             for row in reader:
                 threshold_data.append({k: float(v) for k, v in row.items()})
-
-    loader = request.app.state.loader
-    try:
-        bundle = loader.load()
-        model_version = bundle.version
-        model_algorithm = bundle.metadata.get("selected_model", "unknown")
-    except Exception:
-        model_version = "None loaded"
-        model_algorithm = "N/A"
 
     return {
         "metrics": metrics,

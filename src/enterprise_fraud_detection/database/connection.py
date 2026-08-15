@@ -54,6 +54,11 @@ def init_db() -> None:
     # Auto-migration for existing databases (adds user_id if missing)
     with engine.begin() as conn:
         try:
+            conn.execute(text("ALTER TABLE predictions ADD COLUMN is_archived BOOLEAN DEFAULT 0"))
+        except Exception:
+            pass
+            
+        try:
             conn.execute(text("ALTER TABLE predictions ADD COLUMN user_id INTEGER REFERENCES users(id)"))
         except Exception:
             pass  # Column likely exists

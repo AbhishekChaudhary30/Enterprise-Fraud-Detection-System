@@ -97,11 +97,64 @@ export default function DashboardPage() {
 
   const metrics = stats.model_metrics || {};
 
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleReset = async () => {
+    if (!window.confirm("Are you sure you want to reset the dashboard? Current predictions will be archived to History and your dashboard will drop to zero.")) {
+      return;
+    }
+    setIsResetting(true);
+    try {
+      await api.resetDashboard();
+      // Reload stats
+      const [s, r] = await Promise.all([
+        api.getDashboardStats() as Promise<Stats>,
+        api.getRecentPredictions() as Promise<{ predictions: RecentPrediction[] }>,
+      ]);
+      setStats(s);
+      setRecent(r.predictions);
+    } catch (err) {
+      console.error('Failed to reset dashboard:', err);
+      alert('Failed to reset dashboard');
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   return (
     <div>
-      <div style={{ marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#f1f5f9' }}>Dashboard</h1>
-        <p style={{ fontSize: '14px', color: '#64748b', marginTop: '4px' }}>Real-time fraud intelligence overview</p>
+      <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#f1f5f9' }}>Dashboard</h1>
+          <p style={{ fontSize: '14px', color: '#64748b', marginTop: '4px' }}>Real-time fraud intelligence overview</p>
+        </div>
+        <button
+          onClick={handleReset}
+          disabled={isResetting}
+          style={{
+            background: 'transparent',
+            border: '1px solid #ef4444',
+            color: '#ef4444',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            cursor: isResetting ? 'not-allowed' : 'pointer',
+            fontSize: '13px',
+            fontWeight: 600,
+            opacity: isResetting ? 0.5 : 1,
+            transition: 'all 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}
+          onMouseOver={(e) => {
+            if (!isResetting) e.currentTarget.style.background = 'rgba(239,68,68,0.1)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = 'transparent';
+          }}
+        >
+          {isResetting ? 'Resetting...' : '🔄 Reset Dashboard'}
+        </button>
       </div>
 
       {/* KPI Cards */}

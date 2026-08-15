@@ -3,6 +3,7 @@ import { api } from './services/api';
 import Layout from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import HistoryPage from './pages/HistoryPage';
 import PredictPage from './pages/PredictPage';
 import BatchPage from './pages/BatchPage';
 import InvestigationsPage from './pages/InvestigationsPage';
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="history" element={<HistoryPage />} />
           <Route path="predict" element={<PredictPage />} />
           <Route path="batch" element={<BatchPage />} />
           <Route path="investigations" element={<InvestigationsPage />} />

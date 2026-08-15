@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from sqlalchemy import DateTime, Float, Integer, String, Text, ForeignKey
+from sqlalchemy import DateTime, Float, Integer, String, Text, ForeignKey, Boolean
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -49,6 +49,9 @@ class PredictionRecord(Base):
     input_reference: Mapped[str] = mapped_column(String(255), nullable=True)
     features_json: Mapped[str] = mapped_column(Text, nullable=True)
     explanation_json: Mapped[str] = mapped_column(Text, nullable=True)
+    is_archived: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="0", nullable=False
+    )
 
 
 class Investigation(Base):

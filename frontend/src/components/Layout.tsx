@@ -3,6 +3,7 @@ import { api } from '../services/api';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: '📊' },
+  { path: '/history', label: 'History', icon: '📜' },
   { path: '/predict', label: 'Predict', icon: '🎯' },
   { path: '/batch', label: 'Batch', icon: '📁' },
   { path: '/investigations', label: 'Investigations', icon: '🔍' },
