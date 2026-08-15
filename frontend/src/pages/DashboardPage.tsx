@@ -67,6 +67,29 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [recent, setRecent] = useState<RecentPrediction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleReset = async () => {
+    if (!window.confirm("Are you sure you want to reset the dashboard? Current predictions will be archived to History and your dashboard will drop to zero.")) {
+      return;
+    }
+    setIsResetting(true);
+    try {
+      await api.resetDashboard();
+      // Reload stats
+      const [s, r] = await Promise.all([
+        api.getDashboardStats() as Promise<Stats>,
+        api.getRecentPredictions() as Promise<{ predictions: RecentPrediction[] }>,
+      ]);
+      setStats(s);
+      setRecent(r.predictions);
+    } catch (err) {
+      console.error('Failed to reset dashboard:', err);
+      alert('Failed to reset dashboard');
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -97,29 +120,7 @@ export default function DashboardPage() {
 
   const metrics = stats.model_metrics || {};
 
-  const [isResetting, setIsResetting] = useState(false);
 
-  const handleReset = async () => {
-    if (!window.confirm("Are you sure you want to reset the dashboard? Current predictions will be archived to History and your dashboard will drop to zero.")) {
-      return;
-    }
-    setIsResetting(true);
-    try {
-      await api.resetDashboard();
-      // Reload stats
-      const [s, r] = await Promise.all([
-        api.getDashboardStats() as Promise<Stats>,
-        api.getRecentPredictions() as Promise<{ predictions: RecentPrediction[] }>,
-      ]);
-      setStats(s);
-      setRecent(r.predictions);
-    } catch (err) {
-      console.error('Failed to reset dashboard:', err);
-      alert('Failed to reset dashboard');
-    } finally {
-      setIsResetting(false);
-    }
-  };
 
   return (
     <div>
