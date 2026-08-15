@@ -141,14 +141,14 @@ def create_app() -> FastAPI:
 def _register_model_versions(app: FastAPI) -> None:
     """Sync disk-based model versions into the database registry."""
     try:
-        from enterprise_fraud_detection.database.connection import get_db
+        from enterprise_fraud_detection.database.connection import SessionLocal
         from enterprise_fraud_detection.database.repositories import ModelVersionRepository
 
         loader = app.state.loader
         versions = loader.versions()
         latest = loader.latest_version() if versions else None
 
-        with get_db() as db:
+        with SessionLocal() as db:
             repo = ModelVersionRepository(db)
             for version in versions:
                 try:

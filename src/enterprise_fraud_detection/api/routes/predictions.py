@@ -15,7 +15,7 @@ from enterprise_fraud_detection.api.schemas import (
     PredictionRequest,
     PredictionResponse,
 )
-from enterprise_fraud_detection.database.connection import get_db
+from enterprise_fraud_detection.database.connection import SessionLocal
 from enterprise_fraud_detection.database.repositories import (
     BatchJobRepository,
     InvestigationRepository,
@@ -41,7 +41,7 @@ async def predict(
 
     # Persist to database
     try:
-        with get_db() as db:
+        with SessionLocal() as db:
             user_id = int(user["user_id"]) if "user_id" in user else None
             repo = PredictionRepository(db, user_id=user_id)
             repo.create({**response, "features": payload.features})
@@ -74,7 +74,7 @@ async def predict_batch(
 
     # Persist batch job to database
     try:
-        with get_db() as db:
+        with SessionLocal() as db:
             user_id = int(user["user_id"]) if "user_id" in user else None
             repo = BatchJobRepository(db, user_id=user_id)
             repo.create(summary)
@@ -111,7 +111,7 @@ async def upload_csv(
 
     # Persist batch job to database
     try:
-        with get_db() as db:
+        with SessionLocal() as db:
             user_id = int(user["user_id"]) if "user_id" in user else None
             repo = BatchJobRepository(db, user_id=user_id)
             repo.create(summary)
@@ -142,7 +142,7 @@ async def history(
 
     # Try database first, fall back to file-based history
     try:
-        with get_db() as db:
+        with SessionLocal() as db:
             user_id = int(user["user_id"]) if "user_id" in user else None
             repo = PredictionRepository(db, user_id=user_id)
             records = repo.list_recent(limit=limit)

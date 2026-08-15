@@ -12,7 +12,7 @@ from enterprise_fraud_detection.api.schemas import (
     InvestigationResponse,
     InvestigationUpdate,
 )
-from enterprise_fraud_detection.database.connection import get_db
+from enterprise_fraud_detection.database.connection import SessionLocal
 from enterprise_fraud_detection.database.repositories import (
     InvestigationRepository,
     PredictionRepository,
@@ -29,7 +29,7 @@ async def list_investigations(
 ) -> dict[str, Any]:
     """List investigations with optional status filter."""
     del user
-    with get_db() as db:
+    with SessionLocal() as db:
         user_id = int(user["user_id"]) if "user_id" in user else None
         repo = InvestigationRepository(db, user_id=user_id)
         investigations = repo.list_all(limit=limit, status=status)
@@ -59,7 +59,7 @@ async def create_investigation(
 ) -> dict[str, Any]:
     """Create an investigation for a high-risk prediction."""
     del user
-    with get_db() as db:
+    with SessionLocal() as db:
         user_id = int(user["user_id"]) if "user_id" in user else None
         pred_repo = PredictionRepository(db, user_id=user_id)
         prediction = pred_repo.get_by_id(payload.prediction_id)
@@ -88,7 +88,7 @@ async def get_investigation(
 ) -> dict[str, Any]:
     """Get a single investigation with linked prediction details."""
     del user
-    with get_db() as db:
+    with SessionLocal() as db:
         user_id = int(user["user_id"]) if "user_id" in user else None
         inv_repo = InvestigationRepository(db, user_id=user_id)
         investigation = inv_repo.get_by_id(investigation_id)
@@ -131,7 +131,7 @@ async def update_investigation(
 ) -> dict[str, Any]:
     """Update an investigation status in the workflow."""
     del user
-    with get_db() as db:
+    with SessionLocal() as db:
         user_id = int(user["user_id"]) if "user_id" in user else None
         repo = InvestigationRepository(db, user_id=user_id)
         investigation = repo.update_status(

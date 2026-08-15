@@ -25,6 +25,7 @@ _START_TIME = time.time()
 async def dashboard_stats(
     request: Request,
     user: Annotated[dict[str, str], Depends(current_user)],
+    db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """Aggregated KPI statistics for the dashboard."""
     del user
@@ -37,15 +38,14 @@ async def dashboard_stats(
         model_version = "None loaded"
         model_algorithm = "N/A"
 
-    with get_db() as db:
-        user_id = int(user["user_id"]) if "user_id" in user else None
-        pred_repo = PredictionRepository(db, user_id=user_id)
-        inv_repo = InvestigationRepository(db, user_id=user_id)
-        total = pred_repo.count_total()
-        fraud = pred_repo.count_fraud()
-        risk_dist = pred_repo.count_by_risk_level()
-        avg_prob = pred_repo.avg_probability()
-        inv_counts = inv_repo.count_by_status()
+    user_id = int(user["user_id"]) if "user_id" in user else None
+    pred_repo = PredictionRepository(db, user_id=user_id)
+    inv_repo = InvestigationRepository(db, user_id=user_id)
+    total = pred_repo.count_total()
+    fraud = pred_repo.count_fraud()
+    risk_dist = pred_repo.count_by_risk_level()
+    avg_prob = pred_repo.avg_probability()
+    inv_counts = inv_repo.count_by_status()
 
     # Load evaluation metrics if available
     metrics: dict[str, float] = {}
@@ -73,14 +73,14 @@ async def dashboard_stats(
 @router.get("/dashboard/recent")
 async def dashboard_recent(
     user: Annotated[dict[str, str], Depends(current_user)],
+    db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """Recent predictions for the dashboard table."""
     del user
-    with get_db() as db:
-        user_id = int(user["user_id"]) if "user_id" in user else None
-        pred_repo = PredictionRepository(db, user_id=user_id)
-        recent = pred_repo.list_recent(limit=20)
-        return {
+    user_id = int(user["user_id"]) if "user_id" in user else None
+    pred_repo = PredictionRepository(db, user_id=user_id)
+    recent = pred_repo.list_recent(limit=20)
+    return {
             "predictions": [
                 {
                     "prediction_id": p.prediction_id,
@@ -99,14 +99,14 @@ async def dashboard_recent(
 @router.get("/dashboard/high-risk")
 async def dashboard_high_risk(
     user: Annotated[dict[str, str], Depends(current_user)],
+    db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """High-risk predictions requiring attention."""
     del user
-    with get_db() as db:
-        user_id = int(user["user_id"]) if "user_id" in user else None
-        pred_repo = PredictionRepository(db, user_id=user_id)
-        high_risk = pred_repo.list_recent(limit=20, risk_level="HIGH")
-        return {
+    user_id = int(user["user_id"]) if "user_id" in user else None
+    pred_repo = PredictionRepository(db, user_id=user_id)
+    high_risk = pred_repo.list_recent(limit=20, risk_level="HIGH")
+    return {
             "predictions": [
                 {
                     "prediction_id": p.prediction_id,
@@ -127,6 +127,7 @@ async def dashboard_high_risk(
 async def monitoring_overview(
     request: Request,
     user: Annotated[dict[str, str], Depends(current_user)],
+    db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """System monitoring overview — prediction volume, model health, latency."""
     del user
@@ -140,12 +141,11 @@ async def monitoring_overview(
     except Exception:
         model_loaded = False
 
-    with get_db() as db:
-        user_id = int(user["user_id"]) if "user_id" in user else None
-        pred_repo = PredictionRepository(db, user_id=user_id)
-        total = pred_repo.count_total()
-        fraud = pred_repo.count_fraud()
-        risk_dist = pred_repo.count_by_risk_level()
+    user_id = int(user["user_id"]) if "user_id" in user else None
+    pred_repo = PredictionRepository(db, user_id=user_id)
+    total = pred_repo.count_total()
+    fraud = pred_repo.count_fraud()
+    risk_dist = pred_repo.count_by_risk_level()
 
     return {
         "prediction_volume": total,
@@ -224,14 +224,14 @@ async def monitoring_model_metrics(
 @router.get("/batch-jobs")
 async def list_batch_jobs(
     user: Annotated[dict[str, str], Depends(current_user)],
+    db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """List recent batch prediction jobs."""
     del user
-    with get_db() as db:
-        user_id = int(user["user_id"]) if "user_id" in user else None
-        repo = BatchJobRepository(db, user_id=user_id)
-        jobs = repo.list_recent(limit=50)
-        return {
+    user_id = int(user["user_id"]) if "user_id" in user else None
+    repo = BatchJobRepository(db, user_id=user_id)
+    jobs = repo.list_recent(limit=50)
+    return {
             "jobs": [
                 {
                     "batch_id": j.batch_id,
