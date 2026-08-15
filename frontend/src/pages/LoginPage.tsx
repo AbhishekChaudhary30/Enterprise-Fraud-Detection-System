@@ -15,13 +15,18 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
+
     try {
       if (isRegistering) {
         await api.register(username, password);
+        const data = await api.login(username, password) as { access_token: string };
+        api.setToken(data.access_token);
+        navigate('/dashboard');
       } else {
-        await api.login(username, password);
+        const data = await api.login(username, password) as { access_token: string };
+        api.setToken(data.access_token);
+        navigate('/dashboard');
       }
-      navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Authentication failed');
     } finally {
@@ -33,14 +38,11 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await api.loginGuest();
+      const data = await api.guestAccess() as { access_token: string };
+      api.setToken(data.access_token);
       navigate('/dashboard');
     } catch (err: any) {
-      if (err.response && err.response.data && err.response.data.detail) {
-          setError('Backend Error: ' + err.response.data.detail);
-      } else {
-          setError(err.message || 'Failed to load demo mode');
-      }
+      setError(err.message || 'Guest access failed');
     } finally {
       setLoading(false);
     }
@@ -52,44 +54,41 @@ export default function LoginPage() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #020617 0%, #0f172a 40%, #1e1b4b 100%)',
+      background: '#020617',
+      padding: '20px',
     }}>
       <div style={{
-        width: '100%',
-        maxWidth: '420px',
+        background: '#0f172a',
         padding: '40px',
-        background: 'rgba(15, 23, 42, 0.8)',
-        backdropFilter: 'blur(20px)',
         borderRadius: '16px',
-        border: '1px solid rgba(99, 102, 241, 0.2)',
+        width: '100%',
+        maxWidth: '400px',
+        border: '1px solid #1e293b',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
       }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <span style={{ fontSize: '48px' }}>🛡️</span>
-          <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#f1f5f9', marginTop: '16px' }}>
-            Fraud Intelligence
-          </h1>
-          <p style={{ fontSize: '14px', color: '#64748b', marginTop: '8px' }}>
-            Enterprise Detection Platform
-          </p>
+          <span style={{ fontSize: '48px', display: 'block', marginBottom: '16px' }}>🛡️</span>
+          <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#f1f5f9' }}>Fraud Intelligence</h1>
+          <p style={{ color: '#64748b', marginTop: '8px' }}>Enterprise Platform Login</p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {error && (
-            <div style={{
-              padding: '12px 16px',
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              borderRadius: '8px',
-              color: '#fca5a5',
-              fontSize: '13px',
-            }}>
-              {error}
-            </div>
-          )}
+        {error && (
+          <div style={{
+            background: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid #ef4444',
+            color: '#ef4444',
+            padding: '12px',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            fontSize: '14px',
+          }}>
+            {error}
+          </div>
+        )}
 
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '13px', color: '#94a3b8', marginBottom: '6px', fontWeight: 500 }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#94a3b8', marginBottom: '8px' }}>
               Username
             </label>
             <input
@@ -105,52 +104,58 @@ export default function LoginPage() {
                 border: '1px solid #334155',
                 borderRadius: '8px',
                 color: '#f1f5f9',
-                fontSize: '14px',
+                fontSize: '15px',
                 outline: 'none',
               }}
             />
           </div>
 
-          <div style={{ position: 'relative' }}>
-            <label style={{ display: 'block', fontSize: '13px', color: '#94a3b8', marginBottom: '6px', fontWeight: 500 }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#94a3b8', marginBottom: '8px' }}>
               Password
             </label>
-            <input
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="Enter password"
-              required
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                paddingRight: '40px',
-                background: '#1e293b',
-                border: '1px solid #334155',
-                borderRadius: '8px',
-                color: '#f1f5f9',
-                fontSize: '14px',
-                outline: 'none',
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              style={{
-                position: 'absolute',
-                right: '12px',
-                top: '34px',
-                background: 'transparent',
-                border: 'none',
-                color: '#94a3b8',
-                cursor: 'pointer',
-                fontSize: '16px',
-                padding: 0,
-              }}
-              title={showPassword ? "Hide password" : "Show password"}
-            >
-              {showPassword ? '👁️' : '👁️‍🗨️'}
-            </button>
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="Enter password"
+                required
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  paddingRight: '48px',
+                  background: '#1e293b',
+                  border: '1px solid #334155',
+                  borderRadius: '8px',
+                  color: '#f1f5f9',
+                  fontSize: '15px',
+                  outline: 'none',
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? "Hide password" : "Show password"}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#94a3b8',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  padding: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {showPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
           </div>
 
           <button
