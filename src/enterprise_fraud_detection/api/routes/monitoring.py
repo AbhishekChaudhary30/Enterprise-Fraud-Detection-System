@@ -174,7 +174,7 @@ async def monitoring_overview(
         "model_loaded": model_loaded,
         "avg_latency_ms": metrics_snapshot.get("average_latency_ms", 0.0),
         "error_count": metrics_snapshot.get("error_count", 0),
-        "request_count": metrics_snapshot.get("request_count", 0),
+        "request_count": total,
         "uptime_seconds": round(time.time() - _START_TIME, 2),
     }
 
