@@ -18,7 +18,7 @@ export default function HistoryPage() {
 
   const loadHistory = async () => {
     try {
-      const data = await api.getHistory(500);
+      const data = await api.getHistory(500) as { history: Prediction[] };
       setPredictions(data.history || []);
     } catch (err) {
       console.error(err);
