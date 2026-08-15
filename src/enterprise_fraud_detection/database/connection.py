@@ -52,23 +52,26 @@ def init_db() -> None:
     Base.metadata.create_all(bind=engine)
     
     # Auto-migration for existing databases (adds user_id if missing)
-    with engine.begin() as conn:
-        try:
+    try:
+        with engine.begin() as conn:
             conn.execute(text("ALTER TABLE predictions ADD COLUMN is_archived BOOLEAN DEFAULT FALSE"))
-        except Exception:
-            pass
-            
-        try:
+    except Exception:
+        pass
+        
+    try:
+        with engine.begin() as conn:
             conn.execute(text("ALTER TABLE predictions ADD COLUMN user_id INTEGER REFERENCES users(id)"))
-        except Exception:
-            pass  # Column likely exists
+    except Exception:
+        pass  # Column likely exists
             
-        try:
+    try:
+        with engine.begin() as conn:
             conn.execute(text("ALTER TABLE investigations ADD COLUMN user_id INTEGER REFERENCES users(id)"))
-        except Exception:
-            pass
-            
-        try:
+    except Exception:
+        pass
+        
+    try:
+        with engine.begin() as conn:
             conn.execute(text("ALTER TABLE batch_jobs ADD COLUMN user_id INTEGER REFERENCES users(id)"))
-        except Exception:
-            pass
+    except Exception:
+        pass
