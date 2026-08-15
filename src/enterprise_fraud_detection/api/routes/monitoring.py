@@ -7,6 +7,7 @@ import time
 from typing import Annotated, Any, cast
 
 from fastapi import APIRouter, Depends, Request
+from sqlalchemy.orm import Session
 
 from enterprise_fraud_detection.api.dependencies import current_user
 from enterprise_fraud_detection.database.connection import get_db
@@ -58,18 +59,6 @@ async def dashboard_stats(
     except Exception:
         pass
 
-@router.post("/dashboard/reset")
-async def dashboard_reset(
-    user: Annotated[dict[str, str], Depends(current_user)],
-    db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    """Reset the dashboard by archiving all current predictions."""
-    user_id = int(user["user_id"]) if "user_id" in user else None
-    pred_repo = PredictionRepository(db, user_id=user_id)
-    archived_count = pred_repo.archive_all()
-    return {"status": "success", "archived_count": archived_count}
-
-
     return {
         "total_predictions": total,
         "fraud_detected": fraud,
@@ -85,6 +74,18 @@ async def dashboard_reset(
         "investigation_counts": inv_counts,
         "model_metrics": metrics,
     }
+
+
+@router.post("/dashboard/reset")
+async def dashboard_reset(
+    user: Annotated[dict[str, str], Depends(current_user)],
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Reset the dashboard by archiving all current predictions."""
+    user_id = int(user["user_id"]) if "user_id" in user else None
+    pred_repo = PredictionRepository(db, user_id=user_id)
+    archived_count = pred_repo.archive_all()
+    return {"status": "success", "archived_count": archived_count}
 
 
 @router.get("/dashboard/recent")

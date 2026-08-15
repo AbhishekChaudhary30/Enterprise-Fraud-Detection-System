@@ -15,7 +15,8 @@ from enterprise_fraud_detection.api.schemas import (
     PredictionRequest,
     PredictionResponse,
 )
-from enterprise_fraud_detection.database.connection import SessionLocal
+from enterprise_fraud_detection.database.connection import SessionLocal, get_db
+from sqlalchemy.orm import Session
 from enterprise_fraud_detection.database.repositories import (
     BatchJobRepository,
     InvestigationRepository,
