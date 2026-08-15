@@ -35,7 +35,6 @@ async def predict(
     user: Annotated[dict[str, str], Depends(current_user)],
 ) -> dict[str, Any]:
     """Score one transaction with risk scoring and SHAP explanation."""
-    del user
     response = prediction_service.predict_one(payload.features, payload.version, payload.threshold)
     request.app.state.metrics.observe_prediction()
 
@@ -65,7 +64,6 @@ async def predict_batch(
     user: Annotated[dict[str, str], Depends(current_user)],
 ) -> dict[str, Any]:
     """Score a JSON batch and return prediction rows with risk scoring."""
-    del user
     frame = pd.DataFrame(payload.records)
     output, summary = prediction_service.predict_batch(
         frame, payload.version, payload.threshold, input_reference="json_batch"
@@ -93,7 +91,6 @@ async def upload_csv(
     file: UploadFile = CSV_FILE,
 ) -> StreamingResponse:
     """Validate an uploaded CSV, score it, and return a downloadable CSV."""
-    del user
     if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=415, detail="Only CSV uploads are supported")
     content = await file.read()
@@ -136,7 +133,6 @@ async def history(
     limit: int = 100,
 ) -> dict[str, Any]:
     """Return recent prediction history from database."""
-    del user
     if not 1 <= limit <= 1000:
         raise HTTPException(status_code=422, detail="Limit must be between 1 and 1000")
 

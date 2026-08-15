@@ -28,7 +28,6 @@ async def dashboard_stats(
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """Aggregated KPI statistics for the dashboard."""
-    del user
     loader = request.app.state.loader
     try:
         bundle = loader.load()
@@ -76,7 +75,6 @@ async def dashboard_recent(
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """Recent predictions for the dashboard table."""
-    del user
     user_id = int(user["user_id"]) if "user_id" in user else None
     pred_repo = PredictionRepository(db, user_id=user_id)
     recent = pred_repo.list_recent(limit=20)
@@ -102,7 +100,6 @@ async def dashboard_high_risk(
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """High-risk predictions requiring attention."""
-    del user
     user_id = int(user["user_id"]) if "user_id" in user else None
     pred_repo = PredictionRepository(db, user_id=user_id)
     high_risk = pred_repo.list_recent(limit=20, risk_level="HIGH")
@@ -130,7 +127,6 @@ async def monitoring_overview(
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """System monitoring overview — prediction volume, model health, latency."""
-    del user
     metrics_snapshot = cast(dict[str, Any], request.app.state.metrics.snapshot())
     loader = request.app.state.loader
     model_loaded = True
@@ -170,7 +166,6 @@ async def monitoring_drift(
     user: Annotated[dict[str, str], Depends(current_user)],
 ) -> dict[str, Any]:
     """Latest drift analysis results."""
-    del user
     drift_dir = request.app.state.settings.production.drift_output_directory
     results = {}
     for name in ("data_drift", "prediction_drift", "model_drift"):
@@ -186,7 +181,6 @@ async def monitoring_model_metrics(
     user: Annotated[dict[str, str], Depends(current_user)],
 ) -> dict[str, Any]:
     """Current champion model evaluation metrics."""
-    del user
     eval_path = request.app.state.settings.evaluation.output_directory / "metrics.json"
     if not eval_path.exists():
         return {"metrics": {}, "available": False}
@@ -227,7 +221,6 @@ async def list_batch_jobs(
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """List recent batch prediction jobs."""
-    del user
     user_id = int(user["user_id"]) if "user_id" in user else None
     repo = BatchJobRepository(db, user_id=user_id)
     jobs = repo.list_recent(limit=50)

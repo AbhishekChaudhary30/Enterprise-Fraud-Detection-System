@@ -24,7 +24,6 @@ async def models(
     request: Request, user: Annotated[dict[str, str], Depends(current_user)]
 ) -> dict[str, Any]:
     """List available model versions."""
-    del user
     loader = request.app.state.loader
     return {"versions": loader.versions(), "latest": loader.latest_version()}
 
@@ -34,7 +33,6 @@ async def latest_model(
     request: Request, user: Annotated[dict[str, str], Depends(current_user)]
 ) -> dict[str, Any]:
     """Return latest model metadata and artifact locations."""
-    del user
     bundle = request.app.state.loader.load()
     return {"version": bundle.version, "metadata": bundle.metadata}
 
@@ -46,7 +44,6 @@ async def model_version(
     user: Annotated[dict[str, str], Depends(current_user)],
 ) -> dict[str, Any]:
     """Return metadata for a requested historical model version."""
-    del user
     bundle = request.app.state.loader.load(version)
     return {"version": bundle.version, "metadata": bundle.metadata}
 
@@ -56,7 +53,6 @@ async def reports(
     request: Request, user: Annotated[dict[str, str], Depends(current_user)]
 ) -> dict[str, Any]:
     """List generated evaluation, SHAP, and report artifacts."""
-    del user
     settings = request.app.state.settings
     return {
         "evaluation": _relative_files(settings.evaluation.output_directory),
@@ -72,7 +68,6 @@ async def report_file(
     user: Annotated[dict[str, str], Depends(current_user)],
 ) -> FileResponse:
     """Download a generated report or figure from configured report directories."""
-    del user
     settings = request.app.state.settings
     candidates = [
         settings.evaluation.output_directory / artifact_path,
@@ -90,6 +85,5 @@ async def reload_latest(
     request: Request, user: Annotated[dict[str, str], Depends(admin_user)]
 ) -> dict[str, str]:
     """Reload the latest model bundle for administrative use."""
-    del user
     bundle = request.app.state.predictions.reload()
     return {"status": "reloaded", "version": bundle.version}

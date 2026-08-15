@@ -28,7 +28,6 @@ async def list_investigations(
     limit: int = Query(default=100, ge=1, le=500),
 ) -> dict[str, Any]:
     """List investigations with optional status filter."""
-    del user
     with SessionLocal() as db:
         user_id = int(user["user_id"]) if "user_id" in user else None
         repo = InvestigationRepository(db, user_id=user_id)
@@ -58,7 +57,6 @@ async def create_investigation(
     user: Annotated[dict[str, str], Depends(current_user)],
 ) -> dict[str, Any]:
     """Create an investigation for a high-risk prediction."""
-    del user
     with SessionLocal() as db:
         user_id = int(user["user_id"]) if "user_id" in user else None
         pred_repo = PredictionRepository(db, user_id=user_id)
@@ -87,7 +85,6 @@ async def get_investigation(
     user: Annotated[dict[str, str], Depends(current_user)],
 ) -> dict[str, Any]:
     """Get a single investigation with linked prediction details."""
-    del user
     with SessionLocal() as db:
         user_id = int(user["user_id"]) if "user_id" in user else None
         inv_repo = InvestigationRepository(db, user_id=user_id)
@@ -130,7 +127,6 @@ async def update_investigation(
     user: Annotated[dict[str, str], Depends(current_user)],
 ) -> dict[str, Any]:
     """Update an investigation status in the workflow."""
-    del user
     with SessionLocal() as db:
         user_id = int(user["user_id"]) if "user_id" in user else None
         repo = InvestigationRepository(db, user_id=user_id)
